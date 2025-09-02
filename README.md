@@ -366,6 +366,345 @@ La card rileva automaticamente e reagisce a questi stati:
 3. **Attiva**: Icona accesa, border progress circolare, possibili animazioni
 4. **Snooze**: Icona pulsante, border progress rettangolare, timer dedicato
 
+## Codice card
+# Pop-up Configurazione Sveglia Evoluta
+# Accesso tramite hash URL: #configsveglia
+
+type: vertical-stack
+cards:
+  # Container pop-up principale
+  - type: custom:bubble-card
+    card_type: pop-up
+    hash: "#configsveglia"
+  
+  # Interfaccia a schede per configurazione
+  - type: custom:tabbed-card
+    options: {}
+    tabs:
+      # ==========================================
+      # SCHEDA 1: STATO
+      # ==========================================
+      - attributes:
+          label: Stato
+          icon: mdi:list-status
+        card:
+          type: entities
+          show_header_toggle: false
+          entities:
+            # Timer diretti per monitoraggio
+            - timer.sveglia_principale
+            - timer.sveglia_snooze
+            
+            # Status principale con template personalizzato
+            - type: custom:template-entity-row
+              entity: sensor.sveglia_status
+              name: Status Sveglia
+              state: |
+                {% if is_state('timer.sveglia_principale', 'active') %}
+                  🔔 Attiva - {{ state_attr('timer.sveglia_principale', 'remaining') }}
+                {% elif is_state('timer.sveglia_snooze', 'active') %}
+                  😴 Snooze - {{ state_attr('timer.sveglia_snooze', 'remaining') }}
+                {% elif is_state('input_boolean.sveglia_attivazione', 'on') %}
+                  ⚙️ Preparata - Pronta per l'avvio
+                {% else %}
+                  ⏹️ Inattiva - Non configurata
+                {% endif %}
+              secondary: |
+                {% if is_state('timer.sveglia_principale', 'active') %}
+                  {{ states('input_select.sveglia_tipo') }} | Progresso: {{ states('sensor.sveglia_progresso') }}%
+                {% elif is_state('timer.sveglia_snooze', 'active') %}
+                  Snooze {{ states('input_number.sveglia_snooze_contatore') }}/{{ states('input_number.snooze_numero_massimo') }} | {{ state_attr('sensor.sveglia_snooze_prossima_durata', 'snooze_rimanenti') }} rimanenti
+                {% elif is_state('input_boolean.sveglia_attivazione', 'on') %}
+                  {{ states('input_select.sveglia_tipo') }} | Durata: {{ state_attr('sensor.sveglia_durata_totale', 'durata_formattata') }} | Vol: {{ states('input_number.volume_iniziale') }}-{{ states('input_number.volume_massimo') }}%
+                {% else %}
+                  Configurare parametri e attivare preparazione
+                {% endif %}
+              icon: |
+                {% if is_state('timer.sveglia_principale', 'active') %}
+                  mdi:alarm-bell
+                {% elif is_state('timer.sveglia_snooze', 'active') %}
+                  mdi:sleep
+                {% elif is_state('input_boolean.sveglia_attivazione', 'on') %}
+                  mdi:alarm-check
+                {% else %}
+                  mdi:alarm-plus
+                {% endif %}
+              state_color: |
+                {% if is_state('timer.sveglia_principale', 'active') %}
+                  true
+                {% elif is_state('timer.sveglia_snooze', 'active') %}
+                  true
+                {% elif is_state('input_boolean.sveglia_attivazione', 'on') %}
+                  true
+                {% else %}
+                  false
+                {% endif %}
+            
+            # Metriche operative
+            - type: custom:template-entity-row
+              entity: sensor.sveglia_progresso
+              name: Progresso
+              state: >
+                {% set current = states('input_number.sveglia_aggiornamenti_contatore') | int %}
+                {% set total = states('input_number.numero_aggiornamenti') | int %}
+                {{ current }}/{{ total }} ({{ states('sensor.sveglia_progresso') }}%)
+              icon: mdi:progress-clock
+            
+            - type: custom:template-entity-row
+              entity: sensor.sveglia_progresso
+              name: Volume Corrente
+              state: |
+                {{ state_attr('sensor.sveglia_progresso', 'volume_corrente') }}%
+              icon: mdi:volume-high
+            
+            - type: custom:template-entity-row
+              entity: sensor.sveglia_progresso
+              name: Luminosità Corrente
+              state: >
+                {{ state_attr('sensor.sveglia_progresso', 'luminosita_corrente') }}/255 
+                ({{ (state_attr('sensor.sveglia_progresso', 'luminosita_corrente') | int / 255 * 100) | round(1) }}%)
+              icon: mdi:brightness-6
+            
+            - type: custom:template-entity-row
+              entity: binary_sensor.snooze_disponibile
+              name: Snooze Rimanenti
+              state: >
+                {{ state_attr('binary_sensor.snooze_disponibile', 'snooze_rimanenti') }}/{{
+                state_attr('binary_sensor.snooze_disponibile', 'snooze_massimi') }}
+              icon: mdi:sleep
+            
+            - type: custom:template-entity-row
+              entity: sensor.sveglia_valori_pre_sveglia
+              name: Valori Pre-Sveglia
+              state: >
+                {% if states('sensor.sveglia_valori_pre_sveglia') == 'Memorizzati' %}
+                  📁 Vol: {{ state_attr('sensor.sveglia_valori_pre_sveglia', 'volume_memorizzato') }} | Lum: {{ state_attr('sensor.sveglia_valori_pre_sveglia', 'luminosita_memorizzata_percentuale') }}
+                {% else %}
+                  📭 Non Memorizzati
+                {% endif %}
+              icon: mdi:content-save
+
+      # ==========================================
+      # SCHEDA 2: GENERALE
+      # ==========================================
+      - attributes:
+          label: Generale
+          icon: mdi:cog
+        card:
+          type: entities
+          show_header_toggle: false
+          entities:
+            - entity: input_select.sveglia_tipo
+              name: Tipo di Sveglia
+              icon: mdi:alarm
+            - type: divider
+              style: partial
+            - entity: input_number.sveglia_durata_minuti
+              name: Durata (Minuti)
+              icon: mdi:timer
+            - entity: input_number.sveglia_durata_secondi
+              name: Durata (Secondi)
+              icon: mdi:timer
+            - entity: input_number.numero_aggiornamenti
+              name: N° Aggiornamenti Volume/Luce
+              icon: mdi:update
+
+      # ==========================================
+      # SCHEDA 3: DISPOSITIVI
+      # ==========================================
+      - attributes:
+          label: Dispositivi
+          icon: mdi:devices
+        card:
+          type: entities
+          show_header_toggle: false
+          entities:
+            - entity: input_text.sveglia_entita_switch
+              name: Entità Switch/Interruttore
+              icon: mdi:light-switch
+            - entity: input_text.sveglia_entita_luce
+              name: Entità Lampadina Smart
+              icon: mdi:lightbulb
+            - entity: input_text.sveglia_entita_media_player
+              name: Entità Media Player Spotify
+              icon: mdi:spotify
+            - entity: input_text.sveglia_spotify_device_name
+              name: Nome Device Spotify
+              icon: mdi:speaker
+            - type: divider
+            - entity: input_text.sveglia_uri_media
+              name: URI Spotify (Playlist/Brano)
+              icon: mdi:spotify
+
+      # ==========================================
+      # SCHEDA 4: SNOOZE
+      # ==========================================
+      - attributes:
+          label: Snooze
+          icon: mdi:alarm-snooze
+        card:
+          type: entities
+          show_header_toggle: false
+          entities:
+            - entity: input_number.snooze_durata
+              name: Durata Snooze (sec)
+              icon: mdi:sleep
+            - entity: input_number.snooze_numero_massimo
+              name: N° Massimo Snooze
+              icon: mdi:counter
+            - type: divider
+              style: partial
+            - entity: input_boolean.sveglia_moltiplicativo_attivo
+              name: Attiva Fattore Moltiplicativo
+              icon: mdi:multiplication
+            - entity: input_number.snooze_fattore_moltiplicativo
+              name: Fattore Moltiplicativo
+              icon: mdi:multiplication
+            - type: divider
+              style: partial
+            - entity: input_boolean.sveglia_luci_durante_snooze
+              name: Mantieni Luci Durante Snooze
+              icon: mdi:lightbulb
+            - entity: input_boolean.sveglia_musica_durante_snooze
+              name: Mantieni Musica Durante Snooze
+              icon: mdi:music
+
+      # ==========================================
+      # SCHEDA 5: AUDIO
+      # ==========================================
+      - attributes:
+          label: Audio
+          icon: mdi:music
+        card:
+          type: entities
+          show_header_toggle: false
+          entities:
+            - entity: input_number.volume_iniziale
+              name: Volume Iniziale
+              icon: mdi:volume-low
+            - entity: input_number.volume_massimo
+              name: Volume Massimo
+              icon: mdi:volume-high
+            - type: divider
+              style: partial
+            - entity: input_number.sveglia_volume_pre_sveglia
+              name: Volume Pre-Sveglia Memorizzato
+              icon: mdi:content-save
+            - type: divider
+              style: partial
+            - entity: input_boolean.sveglia_musica_fine_manuale
+              name: Mantieni Musica a Fine Manuale
+              icon: mdi:music-off
+
+      # ==========================================
+      # SCHEDA 6: LUCI
+      # ==========================================
+      - attributes:
+          label: Luci
+          icon: mdi:lightbulb
+        card:
+          type: entities
+          show_header_toggle: false
+          entities:
+            - entity: input_number.luminosita_iniziale
+              name: Luminosità Iniziale
+              icon: mdi:brightness-1
+            - entity: input_number.luminosita_massima
+              name: Luminosità Massima
+              icon: mdi:brightness-6
+            - type: divider
+              style: partial
+            - entity: input_number.sveglia_luminosita_pre_sveglia
+              name: Luminosità Pre-Sveglia Memorizzata
+              icon: mdi:content-save
+            - type: divider
+              style: partial
+            - entity: input_boolean.sveglia_luci_fine_manuale
+              name: Mantieni Luci a Fine Manuale
+              icon: mdi:lightbulb-off
+
+      # ==========================================
+      # SCHEDA 7: SCRIPTS
+      # ==========================================
+      - attributes:
+          label: Scripts
+          icon: mdi:script
+        card:
+          type: entities
+          show_header_toggle: false
+          entities:
+            - entity: input_boolean.sveglia_script_inizio_attivo
+              name: Attiva Script Inizio
+              icon: mdi:script-text-play
+            - entity: input_text.sveglia_script_inizio
+              name: Script di Inizio
+              icon: mdi:script-text-play
+            - type: divider
+              style: partial
+            - entity: input_boolean.sveglia_script_fine_naturale_attivo
+              name: Attiva Script Fine Naturale
+              icon: mdi:script-text
+            - entity: input_text.sveglia_script_fine_naturale
+              name: Script Fine Naturale
+              icon: mdi:script-text
+            - type: divider
+              style: partial
+            - entity: input_boolean.sveglia_script_fine_interrotta_attivo
+              name: Attiva Script Fine Interrotta
+              icon: mdi:script-text-outline
+            - entity: input_text.sveglia_script_fine_interrotta
+              name: Script Fine Interrotta
+              icon: mdi:script-text-outline
+
+      # ==========================================
+      # SCHEDA 8: UTILITIES
+      # ==========================================
+      - attributes:
+          label: Utilities
+          icon: mdi:wrench
+        card:
+          type: entities
+          show_header_toggle: false
+          entities:
+            # Pulsanti di utilità
+            - type: button
+              entity: script.sveglia_reset_completo
+              name: 🔄 Reset Completo Sistema
+              icon: mdi:restore
+              tap_action:
+                action: call-service
+                service: script.sveglia_reset_completo
+              hold_action:
+                action: more-info
+            
+            - type: button
+              entity: script.sveglia_pulizia_automatica
+              name: 🧹 Pulizia Soft
+              icon: mdi:broom
+              tap_action:
+                action: call-service
+                service: script.sveglia_pulizia_automatica
+              hold_action:
+                action: more-info
+            
+            - type: divider
+            
+            # Stato validazione
+            - entity: binary_sensor.sveglia_configurazione_valida
+              name: ✅ Configurazione Valida
+              icon: mdi:check-circle
+            
+            - type: attribute
+              entity: binary_sensor.sveglia_configurazione_valida
+              attribute: errori_configurazione
+              name: Errori Configurazione
+              icon: mdi:alert-circle
+
+    # Layout grid per organizzazione
+    grid_options:
+      columns: 12
+      rows: 4
+
 ## Requisiti
 
 - **Bubble Card**: Componente custom per Home Assistant
