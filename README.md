@@ -177,26 +177,226 @@ Il sistema include validazione automatica:
 
 ## Integrazione con Dashboard
 
-### Card Lovelace Esempio
+### Card Lovelace Bubblecard Esempio
+# Bubble Card - Controllo Sveglia Evoluta
+
+Configurazione per una bubble card avanzata che controlla il sistema di sveglia intelligente con interfaccia grafica dinamica e feedback visivo.
+
+## Configurazione Completa
+
 ```yaml
-type: entities
-title: Controllo Sveglia
-entities:
-  - entity: input_select.sveglia_tipo
-  - entity: input_number.sveglia_durata_minuti
-  - entity: input_number.volume_iniziale
-  - entity: input_number.luminosita_iniziale
-  - entity: input_boolean.sveglia_attivazione
-  - type: divider
-  - entity: sensor.sveglia_status
-  - entity: sensor.sveglia_progresso
-  - entity: binary_sensor.snooze_disponibile
-  - type: divider
-  - entity: input_boolean.sveglia_trigger_inizio
-  - entity: input_boolean.sveglia_trigger_snooze
-  - entity: input_boolean.sveglia_trigger_fine
+type: custom:bubble-card
+card_type: button
+button_type: switch
+entity: media_player.lg_webos_tv_oled65b9sla_5
+
+# Layout e dimensioni
+card_layout: large
+grid_options:
+  columns: 5
+  rows: 3
+
+# Azioni principali
+tap_action:
+  action: call-service
+  perform_action: script.sveglia_controllo_intelligente
+  target: {}
+
+double_tap_action:
+  action: perform-action
+  perform_action: input_boolean.turn_on
+  target:
+    entity_id: input_boolean.sveglia_trigger_snooze
+
+hold_action:
+  action: perform-action
+  perform_action: input_boolean.turn_on
+  target:
+    entity_id: input_boolean.sveglia_trigger_fine
+
+button_action:
+  tap_action:
+    action: none
+
+# Moduli attivi
+modules:
+  - visual_styling_center
+  - conditional_icon
+  - icon_border_progress
+  - icon_animations
+  - subbutton_colors
+  - timer_progress
+  - subbutton_below
+
+# Icona condizionale basata sullo stato
+conditional_icon:
+  advanced_settings:
+    color_true: dark-grey
+    color_false: green
+  conditions:
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_boolean.sveglia_attivazione
+          state: "on"
+        - condition: state
+          entity_id: input_boolean.sveglia_trigger_inizio
+          state: "on"
+        - condition: state
+          entity_id: input_boolean.sveglia_trigger_snooze
+          state: "on"
+  icon_true: mdi:alarm
+  icon_false: mdi:alarm-off
+
+# Progresso bordo icona per timer
+icon_border_progress:
+  # Timer principale
+  - source: timer.sveglia_principale
+    button: main
+    invert: false
+    condition:
+      - condition: state
+        entity_id: input_boolean.sveglia_trigger_snooze
+        state: "off"
+    border_radius: 50%
+    remaining_color: accent
+    background_color: primary
+  
+  # Timer snooze
+  - button: main
+    source: timer.sveglia_snooze
+    invert: true
+    remaining_color: accent
+    border_radius: 20px
+    condition:
+      - condition: state
+        entity_id: input_boolean.sveglia_trigger_snooze
+        state: "on"
+    interpolate_colors: false
+
+# Animazioni icona
+icon_animations:
+  animation_type: pulse
+  animate_when:
+    - condition: state
+      entity_id: timer.sveglia_snooze
+      state: active
+
+# Progresso timer dedicato
+timer_progress:
+  timer_entity: timer.sveglia_snooze
+  startColor: red
+  endColor: green
+  inverted: true
+
+# Styling visivo centralizzato
+visual_styling_center:
+  icon_size_multiplier: 1.5
+  subicon_size_multiplier: 1.2
+  subbutton_background_ratio: 1.5
+  height_multiplier: 1
+  icon_background_ratio: 1.5
+  subbutton_row_spacing: 13
+  subbutton_column_spacing: -4
+  icon_vertical_margin: -10
+  inner_padding: 20
+  subbutton_horizontal_margin: -10
+
+# Sub-button per configurazione
+sub_button:
+  - icon: mdi:cog
+    tap_action:
+      action: navigate
+      url_path: "#configsveglia"
+      navigation_path: "#configsveglia"
+
+# Colori sub-button condizionali
+subbutton_colors:
+  subbutton1:
+    color: green
+    condition:
+      - condition: state
+        entity_id: input_boolean.sveglia_script_inizio_attivo
+        state: "on"
+
+# Opzioni di visualizzazione
+force_icon: false
+show_state: false
+show_name: false
+scrolling_effect: false
 ```
 
+## Funzionalità della Card
+
+### Azioni Gestuali
+
+- **Tap singolo**: Attiva controllo intelligente sveglia (prepara → avvia → snooze)
+- **Double tap**: Attiva snooze direttamente
+- **Hold (pressione lunga)**: Ferma sveglia completamente
+
+### Feedback Visivo
+
+#### Icone Dinamiche
+- **mdi:alarm**: Quando sveglia è preparata, avviata o in snooze
+- **mdi:alarm-off**: Quando sveglia è inattiva
+
+#### Colori Contestuali
+- **Dark-grey**: Stati attivi (preparata, avviata, snooze)
+- **Green**: Stato inattivo
+
+#### Progress Indicators
+- **Border circolare**: Mostra progresso timer principale (durante sveglia attiva)
+- **Border rettangolare**: Mostra progresso timer snooze (durante snooze)
+- **Timer progress bar**: Barra di progresso dedicata per snooze
+
+### Animazioni
+- **Pulse**: L'icona pulsa quando il timer snooze è attivo
+- **Border progress**: Animazione del bordo che segue il timer
+
+### Sub-Button
+- **Icona ingranaggio (mdi:cog)**: Navigazione alla pagina di configurazione
+- **Colore verde condizionale**: Si colora quando gli script personalizzati sono attivi
+
+## Stati Gestiti
+
+La card rileva automaticamente e reagisce a questi stati:
+
+1. **Inattiva**: Icona spenta, nessun progress, colore verde
+2. **Preparata**: Icona accesa, colore grigio scuro
+3. **Attiva**: Icona accesa, border progress circolare, possibili animazioni
+4. **Snooze**: Icona pulsante, border progress rettangolare, timer dedicato
+
+## Requisiti
+
+- **Bubble Card**: Componente custom per Home Assistant
+- **Entità sveglia**: Tutti gli input_boolean e timer del package sveglia evoluta
+- **Pagina configurazione**: Vista con anchor "#configsveglia"
+
+## Personalizzazioni Possibili
+
+### Dimensioni
+```yaml
+visual_styling_center:
+  icon_size_multiplier: 2.0        # Icona più grande
+  height_multiplier: 1.2           # Card più alta
+```
+
+### Colori
+```yaml
+conditional_icon:
+  advanced_settings:
+    color_true: blue               # Cambia colore stato attivo
+    color_false: red               # Cambia colore stato inattivo
+```
+
+### Posizionamento
+```yaml
+grid_options:
+  columns: 3                       # Meno colonne
+  rows: 2                          # Meno righe
+```
+
+Questa configurazione crea un'interfaccia touch moderna e intuitiva per il controllo completo del sistema sveglia evoluta.
 ## Automazioni Ausiliarie Incluse
 
 - **Reset trigger automatico**: Pulizia stati dopo uso
