@@ -1,0 +1,1558 @@
+# ========================================
+# PACKAGE SVEGLIA EVOLUTA
+# ========================================
+# Salva questo file come packages/sveglia_evoluta.yaml
+# Assicurati che nel configuration.yaml ci sia:
+# homeassistant:
+#   packages: !include_dir_named packages
+
+# ========================================
+# HELPER - INPUT SELECT
+# ========================================
+input_select:
+  sveglia_tipo:
+    name: "Tipo Sveglia"
+    options:
+      - "Solo Luce"
+      - "Solo Musica"
+      - "Luce e Musica"
+    initial: "Luce e Musica"
+    icon: mdi:alarm
+
+# ========================================
+# HELPER - INPUT NUMBER
+# ========================================
+input_number:
+  sveglia_durata_minuti:
+    name: "Durata Sveglia (Minuti)"
+    min: 1
+    max: 60
+    step: 1
+    initial: 10
+    unit_of_measurement: "min"
+    icon: mdi:timer
+    
+  sveglia_durata_secondi:
+    name: "Durata Sveglia (Secondi)"
+    min: 0
+    max: 59
+    step: 1
+    initial: 0
+    unit_of_measurement: "sec"
+    icon: mdi:timer
+    
+  snooze_durata:
+    name: "Durata Snooze"
+    min: 10
+    max: 600
+    step: 10
+    initial: 30
+    unit_of_measurement: "sec"
+    icon: mdi:sleep
+    
+  snooze_numero_massimo:
+    name: "Numero Snooze Possibili"
+    min: 1
+    max: 100
+    step: 1
+    initial: 3
+    icon: mdi:counter
+    
+  snooze_fattore_moltiplicativo:
+    name: "Fattore Moltiplicativo Snooze"
+    min: 0.1
+    max: 2.0
+    step: 0.1
+    initial: 1.0
+    icon: mdi:multiplication
+    
+  # Volume iniziale e massimo
+  volume_iniziale:
+    name: "Volume Iniziale"
+    min: 1
+    max: 50
+    step: 1
+    initial: 5
+    unit_of_measurement: "%"
+    icon: mdi:volume-low
+    
+  volume_massimo:
+    name: "Volume Massimo"
+    min: 50
+    max: 100
+    step: 5
+    initial: 80
+    unit_of_measurement: "%"
+    icon: mdi:volume-high
+    
+  # Luminosità iniziale e massima
+  luminosita_iniziale:
+    name: "Luminosità Iniziale"
+    min: 0.01
+    max: 0.30
+    step: 0.01
+    initial: 0.05
+    icon: mdi:brightness-1
+    
+  luminosita_massima:
+    name: "Luminosità Massima"
+    min: 0.5
+    max: 1.0
+    step: 0.05
+    initial: 0.9
+    icon: mdi:brightness-6
+    
+  numero_aggiornamenti:
+    name: "Numero Aggiornamenti Volume/Luminosità"
+    min: 5
+    max: 100
+    step: 5
+    initial: 20
+    icon: mdi:update
+  
+  # Contatori interni
+  sveglia_snooze_contatore:
+    name: "Contatore Snooze"
+    min: 0
+    max: 100
+    step: 1
+    initial: 0
+    icon: mdi:counter
+    
+  sveglia_aggiornamenti_contatore:
+    name: "Contatore Aggiornamenti"
+    min: 0
+    max: 100
+    step: 1
+    initial: 0
+    icon: mdi:counter
+
+  # Memorizzazione valori pre-sveglia
+  sveglia_volume_pre_sveglia:
+    name: "Volume Pre-Sveglia"
+    min: 0
+    max: 100
+    step: 1
+    initial: 50
+    unit_of_measurement: "%"
+    icon: mdi:volume-medium
+    
+  sveglia_luminosita_pre_sveglia:
+    name: "Luminosità Pre-Sveglia"
+    min: 0
+    max: 255
+    step: 1
+    initial: 128
+    icon: mdi:brightness-5
+
+# ========================================
+# HELPER - INPUT BOOLEAN
+# ========================================
+input_boolean:
+  sveglia_moltiplicativo_attivo:
+    name: "Attiva Fattore Moltiplicativo Snooze"
+    initial: false
+    icon: mdi:multiplication
+    
+  sveglia_luci_durante_snooze:
+    name: "Mantieni Luci Durante Snooze"
+    initial: true
+    icon: mdi:lightbulb
+    
+  sveglia_musica_durante_snooze:
+    name: "Mantieni Musica Durante Snooze"
+    initial: false
+    icon: mdi:music
+    
+  sveglia_luci_fine_manuale:
+    name: "Mantieni Luci a Fine Sveglia Manuale"
+    initial: false
+    icon: mdi:lightbulb-off
+    
+  sveglia_musica_fine_manuale:
+    name: "Mantieni Musica a Fine Sveglia Manuale"
+    initial: false
+    icon: mdi:music-off
+    
+  sveglia_script_inizio_attivo:
+    name: "Attiva Script Inizio Sveglia"
+    initial: false
+    icon: mdi:script-text-play
+    
+  sveglia_script_fine_naturale_attivo:
+    name: "Attiva Script Fine Naturale"
+    initial: false
+    icon: mdi:script-text
+    
+  sveglia_script_fine_interrotta_attivo:
+    name: "Attiva Script Fine Interrotta"
+    initial: false
+    icon: mdi:script-text-outline
+  
+  # Attivazione e preparazione sveglia
+  sveglia_attivazione:
+    name: "Attiva Sveglia"
+    initial: false
+    icon: mdi:power
+  
+  # Trigger
+  sveglia_trigger_inizio:
+    name: "Trigger Inizio Sveglia"
+    initial: false
+    icon: mdi:alarm-bell
+    
+  sveglia_trigger_fine:
+    name: "Trigger Fine Sveglia"
+    initial: false
+    icon: mdi:alarm-off
+    
+  sveglia_trigger_snooze:
+    name: "Trigger Snooze"
+    initial: false
+    icon: mdi:sleep
+
+# ========================================
+# HELPER - INPUT TEXT
+# ========================================
+input_text:
+  sveglia_uri_media:
+    name: "URI Brano/Playlist Spotify"
+    initial: "spotify:track:1GEOSS415bZVHNuXWlCT6b"
+    max: 255
+    icon: mdi:spotify
+  
+  sveglia_entita_switch:
+    name: "Entità Switch/Interruttore"
+    initial: "switch.interruttore_luce_cucina"
+    max: 100
+    icon: mdi:light-switch
+  
+  sveglia_entita_luce:
+    name: "Entità Lampadina Smart"
+    initial: "light.luce_cucina"
+    max: 100
+    icon: mdi:lightbulb
+  
+  sveglia_entita_media_player:
+    name: "Entità Media Player Spotify"
+    initial: "media_player.spotifyplus_nicola_reina"
+    max: 100
+    icon: mdi:spotify
+  
+  sveglia_spotify_device_name:
+    name: "Nome Device Spotify"
+    initial: "Alexa Soggiorno"
+    max: 100
+    icon: mdi:speaker
+    
+  sveglia_script_inizio:
+    name: "Script Inizio Sveglia"
+    initial: "script.sveglia_inizio_custom"
+    max: 100
+    icon: mdi:script-text-play
+    
+  sveglia_script_fine_naturale:
+    name: "Script Fine Naturale"
+    initial: "script.sveglia_fine_naturale_custom"
+    max: 100
+    icon: mdi:script-text
+    
+  sveglia_script_fine_interrotta:
+    name: "Script Fine Interrotta"
+    initial: "script.sveglia_fine_interrotta_custom"
+    max: 100
+    icon: mdi:script-text-outline
+
+# ========================================
+# HELPER - TIMER
+# ========================================
+timer:
+  sveglia_principale:
+    name: "Timer Sveglia Principale"
+    duration: "00:10:00"
+    restore: true
+    icon: mdi:alarm
+    
+  sveglia_progresso:
+    name: "Timer Progresso Sveglia"
+    duration: "00:10:00"
+    restore: true
+    icon: mdi:progress-clock
+  
+  sveglia_snooze:
+    name: "Timer Snooze"
+    duration: "00:05:00"
+    restore: true
+    icon: mdi:sleep
+
+# ========================================
+# TEMPLATE SENSORS
+# ========================================
+template:
+  - sensor:
+      # Sensor per lo stato della sveglia
+      - name: "Sveglia Status"
+        unique_id: sveglia_status
+        icon: mdi:alarm-check
+        state: >
+          {% if is_state('timer.sveglia_principale', 'active') %}
+            Attiva
+          {% elif is_state('timer.sveglia_snooze', 'active') %}
+            Snooze
+          {% elif is_state('timer.sveglia_progresso', 'active') %}
+            In Progress
+          {% else %}
+            Inattiva
+          {% endif %}
+        attributes:
+          tempo_rimanente: >
+            {% if is_state('timer.sveglia_principale', 'active') %}
+              {{ state_attr('timer.sveglia_principale', 'remaining') }}
+            {% elif is_state('timer.sveglia_snooze', 'active') %}
+              {{ state_attr('timer.sveglia_snooze', 'remaining') }}
+            {% else %}
+              Nessuno
+            {% endif %}
+          tipo_sveglia: "{{ states('input_select.sveglia_tipo') }}"
+          snooze_effettuati: "{{ states('input_number.sveglia_snooze_contatore') }}"
+          snooze_massimi: "{{ states('input_number.snooze_numero_massimo') }}"
+          
+      # Sensor per il progresso della sveglia
+      - name: "Sveglia Progresso"
+        unique_id: sveglia_progresso
+        icon: mdi:progress-clock
+        unit_of_measurement: "%"
+        state: >
+          {% set current = states('input_number.sveglia_aggiornamenti_contatore') | int %}
+          {% set total = states('input_number.numero_aggiornamenti') | int %}
+          {% if total > 0 %}
+            {{ ((current / total) * 100) | round(0) }}
+          {% else %}
+            0
+          {% endif %}
+        attributes:
+          aggiornamenti_correnti: "{{ states('input_number.sveglia_aggiornamenti_contatore') }}"
+          aggiornamenti_totali: "{{ states('input_number.numero_aggiornamenti') }}"
+          volume_corrente: >
+            {% set current = states('input_number.sveglia_aggiornamenti_contatore') | int %}
+            {% set total = states('input_number.numero_aggiornamenti') | int %}
+            {% set vol_iniziale = states('input_number.volume_iniziale') | int %}
+            {% set vol_max = states('input_number.volume_massimo') | int %}
+            {% if total > 0 %}
+              {{ (vol_iniziale + ((vol_max - vol_iniziale) * current / total)) | round(0) }}
+            {% else %}
+              {{ vol_iniziale }}
+            {% endif %}
+          luminosita_corrente: >
+            {% set current = states('input_number.sveglia_aggiornamenti_contatore') | int %}
+            {% set total = states('input_number.numero_aggiornamenti') | int %}
+            {% set lum_iniziale = states('input_number.luminosita_iniziale') | float %}
+            {% set lum_max = states('input_number.luminosita_massima') | float %}
+            {% if total > 0 %}
+              {{ ((lum_iniziale + ((lum_max - lum_iniziale) * current / total)) * 255) | round(0) }}
+            {% else %}
+              {{ (lum_iniziale * 255) | round(0) }}
+            {% endif %}
+      
+      # Sensor per la durata totale configurata
+      - name: "Sveglia Durata Totale"
+        unique_id: sveglia_durata_totale
+        icon: mdi:timer
+        unit_of_measurement: "sec"
+        state: >
+          {{ (states('input_number.sveglia_durata_minuti') | int * 60) + states('input_number.sveglia_durata_secondi') | int }}
+        attributes:
+          durata_formattata: >
+            {% set total_sec = (states('input_number.sveglia_durata_minuti') | int * 60) + states('input_number.sveglia_durata_secondi') | int %}
+            {% set minutes = (total_sec // 60) %}
+            {% set seconds = (total_sec % 60) %}
+            {{ "%02d:%02d" | format(minutes, seconds) }}
+          intervallo_aggiornamento: >
+            {% set total_sec = (states('input_number.sveglia_durata_minuti') | int * 60) + states('input_number.sveglia_durata_secondi') | int %}
+            {% set aggiornamenti = states('input_number.numero_aggiornamenti') | int %}
+            {% if aggiornamenti > 0 %}
+              {{ (total_sec / aggiornamenti) | round(0) }}
+            {% else %}
+              0
+            {% endif %}
+          volume_iniziale: "{{ states('input_number.volume_iniziale') }}"
+          volume_massimo: "{{ states('input_number.volume_massimo') }}"
+          luminosita_iniziale: "{{ (states('input_number.luminosita_iniziale') | float * 100) | round(1) }}%"
+          luminosita_massima: "{{ (states('input_number.luminosita_massima') | float * 100) | round(1) }}%"
+      
+      # Sensor per la durata snooze calcolata
+      - name: "Sveglia Snooze Prossima Durata"
+        unique_id: sveglia_snooze_prossima_durata
+        icon: mdi:sleep
+        unit_of_measurement: "sec"
+        state: >
+          {% set base_duration = states('input_number.snooze_durata') | int %}
+          {% set current_count = states('input_number.sveglia_snooze_contatore') | int %}
+          {% set multiplier = states('input_number.snooze_fattore_moltiplicativo') | float %}
+          {% set is_multiplicative = is_state('input_boolean.sveglia_moltiplicativo_attivo', 'on') %}
+          {% if is_multiplicative %}
+            {{ (base_duration * (multiplier ** current_count)) | round(0) }}
+          {% else %}
+            {{ base_duration }}
+          {% endif %}
+        attributes:
+          durata_formattata: >
+            {% set base_duration = states('input_number.snooze_durata') | int %}
+            {% set current_count = states('input_number.sveglia_snooze_contatore') | int %}
+            {% set multiplier = states('input_number.snooze_fattore_moltiplicativo') | float %}
+            {% set is_multiplicative = is_state('input_boolean.sveglia_moltiplicativo_attivo', 'on') %}
+            {% if is_multiplicative %}
+              {% set total_sec = (base_duration * (multiplier ** current_count)) | round(0) %}
+            {% else %}
+              {% set total_sec = base_duration %}
+            {% endif %}
+            {% set minutes = (total_sec // 60) %}
+            {% set seconds = (total_sec % 60) %}
+            {{ "%02d:%02d" | format(minutes, seconds) }}
+          snooze_rimanenti: >
+            {{ states('input_number.snooze_numero_massimo') | int - states('input_number.sveglia_snooze_contatore') | int }}
+
+      # Sensor per i valori memorizzati pre-sveglia
+      - name: "Sveglia Valori Pre-Sveglia"
+        unique_id: sveglia_valori_pre_sveglia
+        icon: mdi:content-save
+        state: >
+          {% if states('input_number.sveglia_volume_pre_sveglia') | int > 0 or states('input_number.sveglia_luminosita_pre_sveglia') | int > 0 %}
+            Memorizzati
+          {% else %}
+            Non Memorizzati
+          {% endif %}
+        attributes:
+          volume_memorizzato: "{{ states('input_number.sveglia_volume_pre_sveglia') }}%"
+          luminosita_memorizzata: "{{ states('input_number.sveglia_luminosita_pre_sveglia') }}"
+          luminosita_memorizzata_percentuale: "{{ (states('input_number.sveglia_luminosita_pre_sveglia') | float / 255 * 100) | round(1) }}%"
+
+  - binary_sensor:
+      # Binary sensor per indicare se la sveglia è attiva
+      - name: "Sveglia Attiva"
+        unique_id: sveglia_attiva
+        icon: mdi:alarm
+        state: >
+          {{ is_state('timer.sveglia_principale', 'active') or is_state('timer.sveglia_snooze', 'active') }}
+        attributes:
+          tipo_attivita: >
+            {% if is_state('timer.sveglia_principale', 'active') %}
+              Sveglia Principale
+            {% elif is_state('timer.sveglia_snooze', 'active') %}
+              Snooze
+            {% else %}
+              Nessuna
+            {% endif %}
+      
+      # Binary sensor per indicare se è possibile fare ancora snooze
+      - name: "Snooze Disponibile"
+        unique_id: snooze_disponibile
+        icon: mdi:sleep
+        state: >
+          {{ states('input_number.sveglia_snooze_contatore') | int < states('input_number.snooze_numero_massimo') | int }}
+        attributes:
+          snooze_correnti: "{{ states('input_number.sveglia_snooze_contatore') }}"
+          snooze_massimi: "{{ states('input_number.snooze_numero_massimo') }}"
+          snooze_rimanenti: >
+            {{ states('input_number.snooze_numero_massimo') | int - states('input_number.sveglia_snooze_contatore') | int }}
+      
+      # Binary sensor per configurazione valida
+      - name: "Sveglia Configurazione Valida"
+        unique_id: sveglia_configurazione_valida
+        icon: mdi:check-circle
+        state: >
+          {% set durata_ok = ((states('input_number.sveglia_durata_minuti') | int * 60) + states('input_number.sveglia_durata_secondi') | int) > 0 %}
+          {% set aggiornamenti_ok = states('input_number.numero_aggiornamenti') | int > 0 %}
+          {% set tipo_ok = states('input_select.sveglia_tipo') in ['Solo Luce', 'Solo Musica', 'Luce e Musica'] %}
+          {% set vol_iniziale_ok = 1 <= states('input_number.volume_iniziale') | int <= 50 %}
+          {% set vol_max_ok = 50 <= states('input_number.volume_massimo') | int <= 100 %}
+          {% set vol_logico = states('input_number.volume_iniziale') | int < states('input_number.volume_massimo') | int %}
+          {% set lum_iniziale_ok = 0.01 <= states('input_number.luminosita_iniziale') | float <= 0.30 %}
+          {% set lum_max_ok = 0.5 <= states('input_number.luminosita_massima') | float <= 1.0 %}
+          {% set lum_logico = states('input_number.luminosita_iniziale') | float < states('input_number.luminosita_massima') | float %}
+          {% set attivazione_ok = is_state('input_boolean.sveglia_attivazione', 'on') %}
+          {{ durata_ok and aggiornamenti_ok and tipo_ok and vol_iniziale_ok and vol_max_ok and vol_logico and lum_iniziale_ok and lum_max_ok and lum_logico and attivazione_ok }}
+        attributes:
+          errori_configurazione: >
+            {% set errors = [] %}
+            {% if ((states('input_number.sveglia_durata_minuti') | int * 60) + states('input_number.sveglia_durata_secondi') | int) <= 0 %}
+              {% set errors = errors + ['Durata sveglia deve essere maggiore di 0'] %}
+            {% endif %}
+            {% if states('input_number.numero_aggiornamenti') | int <= 0 %}
+              {% set errors = errors + ['Numero aggiornamenti deve essere maggiore di 0'] %}
+            {% endif %}
+            {% if states('input_select.sveglia_tipo') not in ['Solo Luce', 'Solo Musica', 'Luce e Musica'] %}
+              {% set errors = errors + ['Tipo sveglia non valido'] %}
+            {% endif %}
+            {% if not (1 <= states('input_number.volume_iniziale') | int <= 50) %}
+              {% set errors = errors + ['Volume iniziale deve essere tra 1 e 50'] %}
+            {% endif %}
+            {% if not (50 <= states('input_number.volume_massimo') | int <= 100) %}
+              {% set errors = errors + ['Volume massimo deve essere tra 50 e 100'] %}
+            {% endif %}
+            {% if states('input_number.volume_iniziale') | int >= states('input_number.volume_massimo') | int %}
+              {% set errors = errors + ['Volume iniziale deve essere minore del volume massimo'] %}
+            {% endif %}
+            {% if not (0.01 <= states('input_number.luminosita_iniziale') | float <= 0.30) %}
+              {% set errors = errors + ['Luminosità iniziale deve essere tra 1% e 30%'] %}
+            {% endif %}
+            {% if not (0.5 <= states('input_number.luminosita_massima') | float <= 1.0) %}
+              {% set errors = errors + ['Luminosità massima deve essere tra 50% e 100%'] %}
+            {% endif %}
+            {% if states('input_number.luminosita_iniziale') | float >= states('input_number.luminosita_massima') | float %}
+              {% set errors = errors + ['Luminosità iniziale deve essere minore della luminosità massima'] %}
+            {% endif %}
+            {% if not is_state('input_boolean.sveglia_attivazione', 'on') %}
+              {% set errors = errors + ['La sveglia deve essere attivata prima di poter iniziare'] %}
+            {% endif %}
+            {{ errors | join(', ') if errors else 'Configurazione valida' }}
+
+# ========================================
+# SCRIPT
+# ========================================
+script:
+  # Script di esempio per inizio sveglia
+  sveglia_inizio_custom:
+    alias: "Sveglia - Script Inizio Personalizzato"
+    description: "Script personalizzato eseguito all'inizio della sveglia"
+    mode: single
+    sequence:
+      - action: persistent_notification.create
+        data:
+          title: "🌅 Buongiorno!"
+          message: "La sveglia è iniziata - Buona giornata!"
+          notification_id: "sveglia_buongiorno"
+
+  # Script di esempio per fine naturale
+  sveglia_fine_naturale_custom:
+    alias: "Sveglia - Script Fine Naturale"
+    description: "Script eseguito quando la sveglia termina naturalmente"
+    mode: single
+    sequence:
+      - action: persistent_notification.dismiss
+        data:
+          notification_id: "sveglia_buongiorno"
+
+  # Script di esempio per fine interrotta
+  sveglia_fine_interrotta_custom:
+    alias: "Sveglia - Script Fine Interrotta"
+    description: "Script eseguito quando la sveglia viene interrotta manualmente"
+    mode: single
+    sequence:
+      - action: persistent_notification.dismiss
+        data:
+          notification_id: "sveglia_buongiorno"
+      
+      - action: persistent_notification.create
+        data:
+          title: "⏹️ Sveglia Interrotta"
+          message: "La sveglia è stata fermata manualmente"
+          notification_id: "sveglia_interrotta"
+      
+      - delay:
+          seconds: 3
+      
+      - action: persistent_notification.dismiss
+        data:
+          notification_id: "sveglia_interrotta"
+
+  # Script di reset completo sistema sveglia
+  sveglia_reset_completo:
+    alias: "Sveglia - Reset Completo Sistema"
+    description: "Reset completo di tutti gli helper e timer della sveglia"
+    mode: single
+    sequence:
+      # Ferma tutti i timer attivi
+      - action: timer.cancel
+        target:
+          entity_id: 
+            - timer.sveglia_principale
+            - timer.sveglia_progresso
+            - timer.sveglia_snooze
+        continue_on_error: true
+      
+      # Reset tutti i trigger boolean
+      - action: input_boolean.turn_off
+        target:
+          entity_id: 
+            - input_boolean.sveglia_trigger_inizio
+            - input_boolean.sveglia_trigger_fine
+            - input_boolean.sveglia_trigger_snooze
+      
+      # Reset tutti i contatori
+      - action: input_number.set_value
+        target:
+          entity_id: 
+            - input_number.sveglia_snooze_contatore
+            - input_number.sveglia_aggiornamenti_contatore
+            - input_number.sveglia_volume_pre_sveglia
+            - input_number.sveglia_luminosita_pre_sveglia
+        data:
+          value: 0
+      
+      # Spegni dispositivi se erano controllati dalla sveglia
+      - if:
+          - condition: template
+            value_template: "{{ states('input_select.sveglia_tipo') in ['Solo Luce', 'Luce e Musica'] }}"
+        then:
+          - action: light.turn_off
+            target:
+              entity_id: "{{ states('input_text.sveglia_entita_luce') }}"
+            continue_on_error: true
+          
+          - action: switch.turn_off
+            target:
+              entity_id: "{{ states('input_text.sveglia_entita_switch') }}"
+            continue_on_error: true
+      
+      - if:
+          - condition: template
+            value_template: "{{ states('input_select.sveglia_tipo') in ['Solo Musica', 'Luce e Musica'] }}"
+        then:
+          # Seleziona device prima di fermare per assicurarsi che lo stop funzioni
+          - action: media_player.select_source
+            target:
+              entity_id: "{{ states('input_text.sveglia_entita_media_player') }}"
+            data:
+              source: "{{ states('input_text.sveglia_spotify_device_name') if states('input_text.sveglia_spotify_device_name') not in ['unavailable', 'unknown', ''] else 'Default' }}"
+            continue_on_error: true
+          
+          - delay:
+              milliseconds: 300
+          
+          - action: media_player.media_pause
+            target:
+              entity_id: "{{ states('input_text.sveglia_entita_media_player') }}"
+            continue_on_error: true
+      
+      # Notifica reset completato
+      - action: persistent_notification.create
+        data:
+          title: "🔄 Reset Sveglia Completato"
+          message: "Tutti gli helper e dispositivi sono stati resettati. La sveglia è pronta per un nuovo ciclo."
+          notification_id: "sveglia_reset"
+      
+      - delay:
+          seconds: 3
+      
+      - action: persistent_notification.dismiss
+        data:
+          notification_id: "sveglia_reset"
+
+  # Script di pulizia automatica (da eseguire anche al restart di HA)
+  sveglia_pulizia_automatica:
+    alias: "Sveglia - Pulizia Automatica Startup"
+    description: "Pulizia automatica degli stati al restart di Home Assistant"
+    mode: single
+    sequence:
+      # Reset soft dei soli trigger boolean (mantiene configurazione utente)
+      - action: input_boolean.turn_off
+        target:
+          entity_id: 
+            - input_boolean.sveglia_trigger_inizio
+            - input_boolean.sveglia_trigger_fine
+            - input_boolean.sveglia_trigger_snooze
+      
+      # Reset contatori solo se tutti i timer sono inattivi
+      - if:
+          - condition: template
+            value_template: >
+              {{ is_state('timer.sveglia_principale', 'idle') and 
+                 is_state('timer.sveglia_progresso', 'idle') and 
+                 is_state('timer.sveglia_snooze', 'idle') }}
+        then:
+          - action: input_number.set_value
+            target:
+              entity_id: 
+                - input_number.sveglia_snooze_contatore
+                - input_number.sveglia_aggiornamenti_contatore
+            data:
+              value: 0
+
+# ========================================
+# AUTOMAZIONE PRINCIPALE SVEGLIA EVOLUTA
+# ========================================
+automation:
+  - id: sveglia_evoluta
+    alias: "Sveglia Evoluta"
+    description: "Sveglia con controllo luci e musica, snooze e script personalizzabili"
+    mode: restart
+    max_exceeded: silent
+    
+    variables:
+      # Entità configurabili (utilizzano input_text se disponibili, altrimenti default)
+      interruttore_lampadina: "{{ states('input_text.sveglia_entita_switch') if states('input_text.sveglia_entita_switch') not in ['unavailable', 'unknown', ''] else 'switch.camera_interruttore' }}"
+      lampadina_smart: "{{ states('input_text.sveglia_entita_luce') if states('input_text.sveglia_entita_luce') not in ['unavailable', 'unknown', ''] else 'light.camera_principale' }}"
+      media_player_entity: "{{ states('input_text.sveglia_entita_media_player') if states('input_text.sveglia_entita_media_player') not in ['unavailable', 'unknown', ''] else 'media_player.spotifyplus_user' }}"
+      
+      # Configurazione dinamica da input
+      tipo_sveglia: "{{ states('input_select.sveglia_tipo') }}"
+      durata_totale: "{{ (states('input_number.sveglia_durata_minuti') | int * 60) + states('input_number.sveglia_durata_secondi') | int }}"
+      durata_snooze: "{{ states('input_number.snooze_durata') | int }}"
+      numero_snooze_max: "{{ states('input_number.snooze_numero_massimo') | int }}"
+      fattore_moltiplicativo: "{{ states('input_number.snooze_fattore_moltiplicativo') | float }}"
+      
+      # Valori iniziali e massimi per volume e luminosità
+      volume_iniziale: "{{ states('input_number.volume_iniziale') | float }}"
+      volume_max: "{{ states('input_number.volume_massimo') | float }}"
+      luminosita_iniziale: "{{ states('input_number.luminosita_iniziale') | float }}"
+      luminosita_max: "{{ states('input_number.luminosita_massima') | float }}"
+      
+      aggiornamenti_numero: "{{ states('input_number.numero_aggiornamenti') | int }}"
+      uri_media: "{{ states('input_text.sveglia_uri_media') }}"
+      
+      # Flag booleani
+      moltiplicativo_attivo: "{{ is_state('input_boolean.sveglia_moltiplicativo_attivo', 'on') }}"
+      luci_durante_snooze: "{{ is_state('input_boolean.sveglia_luci_durante_snooze', 'on') }}"
+      musica_durante_snooze: "{{ is_state('input_boolean.sveglia_musica_durante_snooze', 'on') }}"
+      luci_fine_manuale: "{{ is_state('input_boolean.sveglia_luci_fine_manuale', 'on') }}"
+      musica_fine_manuale: "{{ is_state('input_boolean.sveglia_musica_fine_manuale', 'on') }}"
+      script_inizio_attivo: "{{ is_state('input_boolean.sveglia_script_inizio_attivo', 'on') }}"
+      script_fine_naturale_attivo: "{{ is_state('input_boolean.sveglia_script_fine_naturale_attivo', 'on') }}"
+      script_fine_interrotta_attivo: "{{ is_state('input_boolean.sveglia_script_fine_interrotta_attivo', 'on') }}"
+      
+      # Script personalizzati
+      script_inizio: "{{ states('input_text.sveglia_script_inizio') }}"
+      script_fine_naturale: "{{ states('input_text.sveglia_script_fine_naturale') }}"
+      script_fine_interrotta: "{{ states('input_text.sveglia_script_fine_interrotta') }}"
+      
+      # Calcoli dinamici aggiornati per utilizzare i valori iniziali
+      intervallo_aggiornamento: "{{ (durata_totale | int / aggiornamenti_numero | int) | round(0) }}"
+      incremento_volume: "{{ (volume_max | int - volume_iniziale | int) / aggiornamenti_numero | int }}"
+      incremento_luminosita: "{{ ((luminosita_max | float - luminosita_iniziale | float) * 255) / aggiornamenti_numero | int }}"
+    
+    triggers:
+      # Trigger di inizio sveglia
+      - trigger: state
+        entity_id: input_boolean.sveglia_trigger_inizio
+        to: "on"
+        id: "inizio_sveglia"
+      
+      # Trigger per fine anticipata
+      - trigger: state
+        entity_id: input_boolean.sveglia_trigger_fine
+        to: "on"
+        id: "fine_anticipata"
+      
+      # Trigger per snooze
+      - trigger: state
+        entity_id: input_boolean.sveglia_trigger_snooze
+        to: "on"
+        id: "snooze"
+      
+      # Trigger per fine timer principale
+      - trigger: event
+        event_type: timer.finished
+        event_data:
+          entity_id: timer.sveglia_principale
+        id: "fine_naturale"
+      
+      # Trigger per aggiornamenti progressivi
+      - trigger: event
+        event_type: timer.finished
+        event_data:
+          entity_id: timer.sveglia_progresso
+        id: "aggiornamento_progressivo"
+
+    actions:
+      # Memorizza i valori attuali prima della preparazione
+      - if:
+          - condition: template
+            value_template: "{{ tipo_sveglia in ['Solo Musica', 'Luce e Musica'] }}"
+        then:
+          # Memorizza volume attuale del media player
+          - action: input_number.set_value
+            target:
+              entity_id: input_number.sveglia_volume_pre_sveglia
+            data:
+              value: >
+                {%- set current_volume = state_attr(media_player_entity, 'volume_level') | float(0.5) -%}
+                {{ (current_volume * 100) | round(0) }}
+      
+      - if:
+          - condition: template
+            value_template: "{{ tipo_sveglia in ['Solo Luce', 'Luce e Musica'] }}"
+        then:
+          # Memorizza luminosità attuale della luce
+          - action: input_number.set_value
+            target:
+              entity_id: input_number.sveglia_luminosita_pre_sveglia
+            data:
+              value: >
+                {%- set current_brightness = state_attr(lampadina_smart, 'brightness') | int(128) -%}
+                {{ current_brightness }}
+      - choose:
+          # ==========================================
+          # INIZIO SVEGLIA
+          # ==========================================
+          - conditions:
+              - condition: trigger
+                id: "inizio_sveglia"
+              # Condizione aggiunta: la sveglia deve essere attivata
+              - condition: state
+                entity_id: input_boolean.sveglia_attivazione
+                state: "on"
+            sequence:
+              # Reset del booleano di attivazione
+              - action: input_boolean.turn_off
+                target:
+                  entity_id: input_boolean.sveglia_attivazione
+              # Resetta contatori
+              - action: input_number.set_value
+                target:
+                  entity_id: input_number.sveglia_snooze_contatore
+                data:
+                  value: 0
+              
+              - action: input_number.set_value
+                target:
+                  entity_id: input_number.sveglia_aggiornamenti_contatore
+                data:
+                  value: 0
+              
+              # Script di inizio personalizzato
+              - if:
+                  - condition: template
+                    value_template: "{{ script_inizio_attivo }}"
+                  - condition: template
+                    value_template: "{{ states(script_inizio) != 'unavailable' }}"
+                then:
+                  - action: "{{ script_inizio }}"
+              
+              # Avvia timer principale
+              - action: timer.start
+                target:
+                  entity_id: timer.sveglia_principale
+                data:
+                  duration: "{{ durata_totale }}"
+              
+              # Avvia timer di progresso
+              - action: timer.start
+                target:
+                  entity_id: timer.sveglia_progresso
+                data:
+                  duration: "{{ intervallo_aggiornamento }}"
+              
+              # Inizializza luci se richieste (con luminosità iniziale configurabile)
+              - if:
+                  - condition: template
+                    value_template: "{{ tipo_sveglia in ['Solo Luce', 'Luce e Musica'] }}"
+                then:
+                  - action: switch.turn_on
+                    target:
+                      entity_id: "{{ interruttore_lampadina }}"
+                  
+                  - action: light.turn_on
+                    target:
+                      entity_id: "{{ lampadina_smart }}"
+                    data:
+                      brightness: "{{ (luminosita_iniziale * 255) | round(0) }}"
+                      transition: 2
+              
+              # Inizializza musica se richiesta (con volume iniziale configurabile)
+              - if:
+                  - condition: template
+                    value_template: "{{ tipo_sveglia in ['Solo Musica', 'Luce e Musica'] }}"
+                then:
+                  # Seleziona il source/device prima di qualsiasi azione
+                  - action: media_player.select_source
+                    target:
+                      entity_id: "{{ media_player_entity }}"
+                    data:
+                      source: "{{ states('input_text.sveglia_spotify_device_name') if states('input_text.sveglia_spotify_device_name') not in ['unavailable', 'unknown', ''] else 'Default' }}"
+                    continue_on_error: true
+                  
+                  # Piccola pausa per permettere la selezione del device
+                  - delay:
+                      milliseconds: 500
+                  
+                  # Imposta volume iniziale con servizio SpotifyPlus specifico
+                  - action: spotifyplus.player_set_volume_level
+                    data:
+                      entity_id: "{{ media_player_entity }}"
+                      volume_level: "{{ volume_iniziale | int }}"
+                  
+                  # Attendi che il volume sia effettivamente impostato al valore iniziale
+                  - wait_template: >
+                      {%- set volume = state_attr(media_player_entity, "volume_level") | float(0) -%}
+                      {{- (volume | round(2)) == (volume_iniziale / 100) | round(2) -}}
+                    timeout: 10
+                    continue_on_timeout: true
+                  
+                  # Avvia riproduzione
+                  - action: spotifyplus.player_media_play_tracks
+                    data:
+                      entity_id: "{{ media_player_entity }}"
+                      uris: "{{ uri_media }}"
+          
+          # ==========================================
+          # AGGIORNAMENTO PROGRESSIVO
+          # ==========================================
+          - conditions:
+              - condition: trigger
+                id: "aggiornamento_progressivo"
+              - condition: state
+                entity_id: timer.sveglia_principale
+                state: "active"
+            sequence:
+              # Incrementa contatore aggiornamenti
+              - action: input_number.set_value
+                target:
+                  entity_id: input_number.sveglia_aggiornamenti_contatore
+                data:
+                  value: "{{ states('input_number.sveglia_aggiornamenti_contatore') | int + 1 }}"
+              
+              - variables:
+                  aggiornamento_corrente: "{{ states('input_number.sveglia_aggiornamenti_contatore') | int }}"
+                  nuovo_volume: "{{ (volume_iniziale + (incremento_volume | float * aggiornamento_corrente)) | round(0) | int }}"
+                  nuova_luminosita: "{{ ((luminosita_iniziale + (incremento_luminosita | float * aggiornamento_corrente / 255)) * 255) | int }}"
+              
+              # Aggiorna volume se necessario
+              - if:
+                  - condition: template
+                    value_template: "{{ tipo_sveglia in ['Solo Musica', 'Luce e Musica'] }}"
+                  - condition: template
+                    value_template: "{{ nuovo_volume <= volume_max }}"
+                then:
+                  # Seleziona device prima di cambiare volume
+                  - action: media_player.select_source
+                    target:
+                      entity_id: "{{ media_player_entity }}"
+                    data:
+                      source: "{{ states('input_text.sveglia_spotify_device_name') if states('input_text.sveglia_spotify_device_name') not in ['unavailable', 'unknown', ''] else 'Default' }}"
+                    continue_on_error: true
+                  
+                  - delay:
+                      milliseconds: 200
+                  
+                  - action: spotifyplus.player_set_volume_level
+                    data:
+                      entity_id: "{{ media_player_entity }}"
+                      volume_level: "{{ nuovo_volume }}"
+              
+              # Aggiorna luminosità se necessario
+              - if:
+                  - condition: template
+                    value_template: "{{ tipo_sveglia in ['Solo Luce', 'Luce e Musica'] }}"
+                  - condition: template
+                    value_template: "{{ nuova_luminosita <= (luminosita_max * 255) }}"
+                then:
+                  - action: light.turn_on
+                    target:
+                      entity_id: "{{ lampadina_smart }}"
+                    data:
+                      brightness: "{{ nuova_luminosita }}"
+                      transition: "{{ intervallo_aggiornamento / 2 }}"
+              
+              # Riavvia timer di progresso se non ha raggiunto il massimo
+              - if:
+                  - condition: template
+                    value_template: "{{ aggiornamento_corrente < aggiornamenti_numero }}"
+                then:
+                  - action: timer.start
+                    target:
+                      entity_id: timer.sveglia_progresso
+                    data:
+                      duration: "{{ intervallo_aggiornamento }}"
+          
+          # ==========================================
+          # SNOOZE
+          # ==========================================
+          - conditions:
+              - condition: trigger
+                id: "snooze"
+              - condition: state
+                entity_id: timer.sveglia_principale
+                state: "active"
+            sequence:
+              - variables:
+                  snooze_corrente: "{{ states('input_number.sveglia_snooze_contatore') | int }}"
+                  nuova_durata_snooze: >
+                    {% if moltiplicativo_attivo %}
+                      {{ (durata_snooze * (fattore_moltiplicativo ** snooze_corrente)) | int }}
+                    {% else %}
+                      {{ durata_snooze }}
+                    {% endif %}
+              
+              # Verifica se può ancora fare snooze
+              - if:
+                  - condition: template
+                    value_template: "{{ snooze_corrente < numero_snooze_max }}"
+                then:
+                  # Incrementa contatore snooze
+                  - action: input_number.set_value
+                    target:
+                      entity_id: input_number.sveglia_snooze_contatore
+                    data:
+                      value: "{{ snooze_corrente + 1 }}"
+                  
+                  # Pausa timer principale
+                  - action: timer.pause
+                    target:
+                      entity_id: timer.sveglia_principale
+                  
+                  # Pausa timer progresso
+                  - action: timer.pause
+                    target:
+                      entity_id: timer.sveglia_progresso
+                  
+                  # Gestisci luci durante snooze
+                  - if:
+                      - condition: template
+                        value_template: "{{ not luci_durante_snooze and tipo_sveglia in ['Solo Luce', 'Luce e Musica'] }}"
+                    then:
+                      - action: light.turn_off
+                        target:
+                          entity_id: "{{ lampadina_smart }}"
+                  
+                  # Gestisci musica durante snooze
+                  - if:
+                      - condition: template
+                        value_template: "{{ not musica_durante_snooze and tipo_sveglia in ['Solo Musica', 'Luce e Musica'] }}"
+                    then:
+                      # Seleziona device prima di mettere in pausa
+                      - action: media_player.select_source
+                        target:
+                          entity_id: "{{ media_player_entity }}"
+                        data:
+                          source: "{{ states('input_text.sveglia_spotify_device_name') if states('input_text.sveglia_spotify_device_name') not in ['unavailable', 'unknown', ''] else 'Default' }}"
+                        continue_on_error: true
+                      
+                      - delay:
+                          milliseconds: 200
+                      
+                      - action: media_player.media_pause
+                        target:
+                          entity_id: "{{ media_player_entity }}"
+                  
+                  # Avvia timer snooze
+                  - action: timer.start
+                    target:
+                      entity_id: timer.sveglia_snooze
+                    data:
+                      duration: "{{ nuova_durata_snooze }}"
+                  
+                  # Attende fine snooze
+                  - wait_for_trigger:
+                      - trigger: event
+                        event_type: timer.finished
+                        event_data:
+                          entity_id: timer.sveglia_snooze
+                    timeout: "{{ nuova_durata_snooze + 10 }}"
+                  
+                  # Riprendi sveglia dopo snooze
+                  - if:
+                      - condition: template
+                        value_template: "{{ not luci_durante_snooze and tipo_sveglia in ['Solo Luce', 'Luce e Musica'] }}"
+                    then:
+                      - action: light.turn_on
+                        target:
+                          entity_id: "{{ lampadina_smart }}"
+                  
+                  - if:
+                      - condition: template
+                        value_template: "{{ not musica_durante_snooze and tipo_sveglia in ['Solo Musica', 'Luce e Musica'] }}"
+                    then:
+                      # Seleziona device prima di riprendere la riproduzione
+                      - action: media_player.select_source
+                        target:
+                          entity_id: "{{ media_player_entity }}"
+                        data:
+                          source: "{{ states('input_text.sveglia_spotify_device_name') if states('input_text.sveglia_spotify_device_name') not in ['unavailable', 'unknown', ''] else 'Default' }}"
+                        continue_on_error: true
+                      
+                      - delay:
+                          milliseconds: 300
+                      
+                      - action: media_player.media_play
+                        target:
+                          entity_id: "{{ media_player_entity }}"
+                  
+                  # Riprendi timer
+                  - action: timer.start
+                    target:
+                      entity_id: timer.sveglia_principale
+                  
+                  - action: timer.start
+                    target:
+                      entity_id: timer.sveglia_progresso
+                else:
+                  # Troppi snooze, termina sveglia
+                  - action: automation.trigger
+                    target:
+                      entity_id: automation.sveglia_evoluta
+                    data:
+                      skip_condition: true
+          
+          # ==========================================
+          # FINE NATURALE
+          # ==========================================
+          - conditions:
+              - condition: trigger
+                id: "fine_naturale"
+            sequence:
+              # Ferma timer progresso
+              - action: timer.cancel
+                target:
+                  entity_id: timer.sveglia_progresso
+              
+              # Script di fine naturale
+              - if:
+                  - condition: template
+                    value_template: "{{ script_fine_naturale_attivo }}"
+                  - condition: template
+                    value_template: "{{ states(script_fine_naturale) != 'unavailable' }}"
+                then:
+                  - action: "{{ script_fine_naturale }}"
+              
+              # Gestisci luci a fine sveglia
+              - if:
+                  - condition: template
+                    value_template: "{{ tipo_sveglia in ['Solo Luce', 'Luce e Musica'] }}"
+                then:
+                  - if:
+                      - condition: template
+                        value_template: "{{ not luci_fine_manuale }}"
+                    then:
+                      - action: light.turn_off
+                        target:
+                          entity_id: "{{ lampadina_smart }}"
+                      - action: switch.turn_off
+                        target:
+                          entity_id: "{{ interruttore_lampadina }}"
+              
+              # Gestisci musica a fine sveglia
+              - if:
+                  - condition: template
+                    value_template: "{{ tipo_sveglia in ['Solo Musica', 'Luce e Musica'] }}"
+                then:
+                  - if:
+                      - condition: template
+                        value_template: "{{ not musica_fine_manuale }}"
+                    then:
+                      # Seleziona device prima di fermare
+                      - action: media_player.select_source
+                        target:
+                          entity_id: "{{ media_player_entity }}"
+                        data:
+                          source: "{{ states('input_text.sveglia_spotify_device_name') if states('input_text.sveglia_spotify_device_name') not in ['unavailable', 'unknown', ''] else 'Default' }}"
+                        continue_on_error: true
+                      
+                      - delay:
+                          milliseconds: 300
+                      
+                      - action: media_player.media_pause
+                        target:
+                          entity_id: "{{ media_player_entity }}"
+              
+              # Reset completo di tutti gli helper per prossimo ciclo
+              - action: input_boolean.turn_off
+                target:
+                  entity_id: 
+                    - input_boolean.sveglia_trigger_inizio
+                    - input_boolean.sveglia_trigger_fine
+                    - input_boolean.sveglia_trigger_snooze
+              
+              # Reset contatori
+              - action: input_number.set_value
+                target:
+                  entity_id: input_number.sveglia_snooze_contatore
+                data:
+                  value: 0
+              
+              - action: input_number.set_value
+                target:
+                  entity_id: input_number.sveglia_aggiornamenti_contatore
+                data:
+                  value: 0
+              
+              # Assicurati che tutti i timer siano fermi
+              - action: timer.cancel
+                target:
+                  entity_id: 
+                    - timer.sveglia_principale
+                    - timer.sveglia_progresso
+                    - timer.sveglia_snooze
+                continue_on_error: true
+          
+          # ==========================================
+          # FINE ANTICIPATA
+          # ==========================================
+          - conditions:
+              - condition: trigger
+                id: "fine_anticipata"
+            sequence:
+              # Ferma tutti i timer
+              - action: timer.cancel
+                target:
+                  entity_id: timer.sveglia_principale
+              
+              - action: timer.cancel
+                target:
+                  entity_id: timer.sveglia_progresso
+              
+              - action: timer.cancel
+                target:
+                  entity_id: timer.sveglia_snooze
+              
+              # Script di fine interrotta
+              - if:
+                  - condition: template
+                    value_template: "{{ script_fine_interrotta_attivo }}"
+                  - condition: template
+                    value_template: "{{ states(script_fine_interrotta) != 'unavailable' }}"
+                then:
+                  - action: "{{ script_fine_interrotta }}"
+              
+              # Gestisci luci secondo preferenze
+              - if:
+                  - condition: template
+                    value_template: "{{ tipo_sveglia in ['Solo Luce', 'Luce e Musica'] }}"
+                then:
+                  - if:
+                      - condition: template
+                        value_template: "{{ not luci_fine_manuale }}"
+                    then:
+                      # Ripristina luminosità pre-sveglia prima di spegnere
+                      - action: light.turn_on
+                        target:
+                          entity_id: "{{ lampadina_smart }}"
+                        data:
+                          brightness: "{{ states('input_number.sveglia_luminosita_pre_sveglia') | int }}"
+                          transition: 2
+                      
+                      - delay:
+                          seconds: 3
+                      
+                      - action: light.turn_off
+                        target:
+                          entity_id: "{{ lampadina_smart }}"
+                      - action: switch.turn_off
+                        target:
+                          entity_id: "{{ interruttore_lampadina }}"
+              
+              # Gestisci musica secondo preferenze
+              - if:
+                  - condition: template
+                    value_template: "{{ tipo_sveglia in ['Solo Musica', 'Luce e Musica'] }}"
+                then:
+                  - if:
+                      - condition: template
+                        value_template: "{{ not musica_fine_manuale }}"
+                    then:
+                      # Seleziona device prima di ripristinare volume
+                      - action: media_player.select_source
+                        target:
+                          entity_id: "{{ media_player_entity }}"
+                        data:
+                          source: "{{ states('input_text.sveglia_spotify_device_name') if states('input_text.sveglia_spotify_device_name') not in ['unavailable', 'unknown', ''] else 'Default' }}"
+                        continue_on_error: true
+                      
+                      - delay:
+                          milliseconds: 300
+                      
+                      # Ripristina volume pre-sveglia prima di fermare
+                      - action: spotifyplus.player_set_volume_level
+                        data:
+                          entity_id: "{{ media_player_entity }}"
+                          volume_level: "{{ states('input_number.sveglia_volume_pre_sveglia') | int }}"
+                        continue_on_error: true
+                      
+                      - delay:
+                          seconds: 2
+                      
+                      - action: media_player.media_pause
+                        target:
+                          entity_id: "{{ media_player_entity }}"
+              
+              # Reset completo di tutti gli helper per prossimo ciclo
+              - action: input_boolean.turn_off
+                target:
+                  entity_id: 
+                    - input_boolean.sveglia_trigger_inizio
+                    - input_boolean.sveglia_trigger_fine
+                    - input_boolean.sveglia_trigger_snooze
+              
+              # Reset contatori
+              - action: input_number.set_value
+                target:
+                  entity_id: input_number.sveglia_snooze_contatore
+                data:
+                  value: 0
+              
+              - action: input_number.set_value
+                target:
+                  entity_id: input_number.sveglia_aggiornamenti_contatore
+                data:
+                  value: 0
+              
+              # Assicurati che tutti i timer siano fermi
+              - action: timer.cancel
+                target:
+                  entity_id: 
+                    - timer.sveglia_principale
+                    - timer.sveglia_progresso
+                    - timer.sveglia_snooze
+                continue_on_error: true
+
+  # ==========================================
+  # AUTOMAZIONI AUSILIARIE
+  # ==========================================
+  
+  # Automazione per reset automatico dei trigger
+  - id: sveglia_reset_trigger
+    alias: "Sveglia - Reset Trigger Automatico"
+    description: "Reset automatico dei trigger dopo un breve delay"
+    mode: restart
+    triggers:
+      - trigger: state
+        entity_id: 
+          - input_boolean.sveglia_trigger_snooze
+        to: "on"
+        for:
+          seconds: 2
+        id: "reset_snooze"
+      
+      # Reset del trigger di fine quando tutti i timer sono inattivi
+      - trigger: template
+        value_template: >
+          {{ is_state('timer.sveglia_principale', 'idle') and 
+             is_state('timer.sveglia_progresso', 'idle') and 
+             is_state('timer.sveglia_snooze', 'idle') and
+             is_state('input_boolean.sveglia_trigger_fine', 'on') }}
+        for:
+          seconds: 5
+        id: "reset_fine_delayed"
+    
+    actions:
+      - choose:
+          - conditions:
+              - condition: trigger
+                id: "reset_snooze"
+            sequence:
+              - action: input_boolean.turn_off
+                target:
+                  entity_id: input_boolean.sveglia_trigger_snooze
+          
+          - conditions:
+              - condition: trigger
+                id: "reset_fine_delayed"
+            sequence:
+              - action: input_boolean.turn_off
+                target:
+                  entity_id: input_boolean.sveglia_trigger_fine
+  
+  # Automazione per notifica stato sveglia
+  - id: sveglia_notifiche
+    alias: "Sveglia - Notifiche Stato"
+    description: "Invia notifiche sui cambiamenti di stato della sveglia"
+    mode: queued
+    triggers:
+      - trigger: state
+        entity_id: binary_sensor.sveglia_attiva
+        to: "on"
+        id: "avvio"
+      
+      - trigger: state
+        entity_id: binary_sensor.sveglia_attiva
+        to: "off"
+        id: "fine"
+      
+      - trigger: state
+        entity_id: timer.sveglia_snooze
+        to: "active"
+        id: "snooze_start"
+    actions:
+      - choose:
+          - conditions:
+              - condition: trigger
+                id: "avvio"
+            sequence:
+              - action: persistent_notification.create
+                data:
+                  title: "🔔 Sveglia Avviata"
+                  message: >
+                    Tipo: {{ states('input_select.sveglia_tipo') }}
+                    Durata: {{ state_attr('sensor.sveglia_durata_totale', 'durata_formattata') }}
+                    Volume: {{ states('input_number.volume_iniziale') }}% → {{ states('input_number.volume_massimo') }}%
+                    Luminosità: {{ (states('input_number.luminosita_iniziale') | float * 100) | round(1) }}% → {{ (states('input_number.luminosita_massima') | float * 100) | round(1) }}%
+                  notification_id: "sveglia_status"
+          
+          - conditions:
+              - condition: trigger
+                id: "fine"
+            sequence:
+              - action: persistent_notification.dismiss
+                data:
+                  notification_id: "sveglia_status"
+              
+              - action: persistent_notification.create
+                data:
+                  title: "⏰ Sveglia Terminata"
+                  message: "La sveglia è stata completata o interrotta"
+                  notification_id: "sveglia_end"
+              
+              - delay:
+                  seconds: 5
+              
+              - action: persistent_notification.dismiss
+                data:
+                  notification_id: "sveglia_end"
+          
+          - conditions:
+              - condition: trigger
+                id: "snooze_start"
+            sequence:
+              - action: persistent_notification.create
+                data:
+                  title: "😴 Snooze Attivato"
+                  message: >
+                    Durata: {{ state_attr('sensor.sveglia_snooze_prossima_durata', 'durata_formattata') }}
+                    Rimanenti: {{ state_attr('binary_sensor.snooze_disponibile', 'snooze_rimanenti') }}
+                  notification_id: "sveglia_snooze"
+
+  # Automazione per pulizia al restart di Home Assistant
+  - id: sveglia_pulizia_restart
+    alias: "Sveglia - Pulizia al Restart"
+    description: "Esegue pulizia automatica degli stati al restart di HA"
+    mode: single
+    triggers:
+      - trigger: homeassistant
+        event: start
+    actions:
+      - delay:
+          seconds: 30  # Attende che tutti i sistemi siano pronti
+      
+      - action: script.sveglia_pulizia_automatica
+      
+      # Log dell'operazione
+      - action: system_log.write
+        data:
+          message: "Sveglia Evoluta: Pulizia automatica completata al restart"
+          level: info
+
+  # Automazione di preparazione sveglia
+  - id: sveglia_preparazione
+    alias: "Sveglia - Preparazione e Test"
+    description: "Prepara luce e player alle condizioni iniziali quando si attiva la sveglia"
+    mode: single
+    variables:
+      # Utilizza le stesse variabili dell'automazione principale
+      interruttore_lampadina: "{{ states('input_text.sveglia_entita_switch') if states('input_text.sveglia_entita_switch') not in ['unavailable', 'unknown', ''] else 'switch.camera_interruttore' }}"
+      lampadina_smart: "{{ states('input_text.sveglia_entita_luce') if states('input_text.sveglia_entita_luce') not in ['unavailable', 'unknown', ''] else 'light.camera_principale' }}"
+      media_player_entity: "{{ states('input_text.sveglia_entita_media_player') if states('input_text.sveglia_entita_media_player') not in ['unavailable', 'unknown', ''] else 'media_player.spotifyplus_user' }}"
+      tipo_sveglia: "{{ states('input_select.sveglia_tipo') }}"
+      volume_iniziale: "{{ states('input_number.volume_iniziale') | float }}"
+      luminosita_iniziale: "{{ states('input_number.luminosita_iniziale') | float }}"
+      uri_media: "{{ states('input_text.sveglia_uri_media') }}"
+    
+    triggers:
+      - trigger: state
+        entity_id: input_boolean.sveglia_attivazione
+        to: "on"
+    
+    actions:
+      # Prepara il media player se richiesto
+      - if:
+          - condition: template
+            value_template: "{{ tipo_sveglia in ['Solo Musica', 'Luce e Musica'] }}"
+        then:
+          # Seleziona il device/source Spotify
+          - action: media_player.select_source
+            target:
+              entity_id: "{{ media_player_entity }}"
+            data:
+              source: "{{ states('input_text.sveglia_spotify_device_name') if states('input_text.sveglia_spotify_device_name') not in ['unavailable', 'unknown', ''] else 'Default' }}"
+            continue_on_error: true
+          
+          - delay:
+              milliseconds: 500
+          
+          # Imposta volume iniziale
+          - action: spotifyplus.player_set_volume_level
+            data:
+              entity_id: "{{ media_player_entity }}"
+              volume_level: "{{ volume_iniziale | int }}"
+          
+          # Attendi che il volume sia impostato
+          - wait_template: >
+              {%- set volume = state_attr(media_player_entity, "volume_level") | float(0) -%}
+              {{- (volume | round(2)) == (volume_iniziale / 100) | round(2) -}}
+            timeout: 5
+            continue_on_timeout: true
+          
+          # Avvia riproduzione per 5 secondi
+          - action: spotifyplus.player_media_play_tracks
+            data:
+              entity_id: "{{ media_player_entity }}"
+              uris: "{{ uri_media }}"
+      
+      # Prepara le luci se richieste
+      - if:
+          - condition: template
+            value_template: "{{ tipo_sveglia in ['Solo Luce', 'Luce e Musica'] }}"
+        then:
+          # Accendi interruttore
+          - action: switch.turn_on
+            target:
+              entity_id: "{{ interruttore_lampadina }}"
+          
+          # Accendi luce con luminosità iniziale
+          - action: light.turn_on
+            target:
+              entity_id: "{{ lampadina_smart }}"
+            data:
+              brightness: "{{ (luminosita_iniziale * 255) | round(0) }}"
+              transition: 1
+      
+      # Attendi 5 secondi
+      - delay:
+          seconds: 5
+      
+      # Spegni la luce (non l'interruttore) se era stata accesa
+      - if:
+          - condition: template
+            value_template: "{{ tipo_sveglia in ['Solo Luce', 'Luce e Musica'] }}"
+        then:
+          - action: light.turn_off
+            target:
+              entity_id: "{{ lampadina_smart }}"
+      
+      # Ferma la riproduzione se era stata avviata
+      - if:
+          - condition: template
+            value_template: "{{ tipo_sveglia in ['Solo Musica', 'Luce e Musica'] }}"
+        then:
+          # Seleziona device prima di fermare
+          - action: media_player.select_source
+            target:
+              entity_id: "{{ media_player_entity }}"
+            data:
+              source: "{{ states('input_text.sveglia_spotify_device_name') if states('input_text.sveglia_spotify_device_name') not in ['unavailable', 'unknown', ''] else 'Default' }}"
+            continue_on_error: true
+          
+          - delay:
+              milliseconds: 200
+          
+          - action: media_player.media_pause
+            target:
+              entity_id: "{{ media_player_entity }}"
+      
+      # Notifica di preparazione completata
+      - action: persistent_notification.create
+        data:
+          title: "✅ Sveglia Preparata"
+          message: >
+            La sveglia è stata preparata e testata:
+            - Tipo: {{ tipo_sveglia }}
+            - Volume iniziale: {{ volume_iniziale }}%
+            - Luminosità iniziale: {{ (luminosita_iniziale * 100) | round(1) }}%
+            Ora puoi avviare la sveglia con il trigger di inizio.
+          notification_id: "sveglia_preparata"
+      
+      - delay:
+          seconds: 5
+      
+      - action: persistent_notification.dismiss
+        data:
+          notification_id: "sveglia_preparata"
