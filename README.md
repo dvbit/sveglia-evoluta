@@ -367,6 +367,8 @@ La card rileva automaticamente e reagisce a questi stati:
 4. **Snooze**: Icona pulsante, border progress rettangolare, timer dedicato
 
 ## Codice card
+```yaml
+
 # Pop-up Configurazione Sveglia Evoluta
 # Accesso tramite hash URL: #configsveglia
 
@@ -704,6 +706,7 @@ cards:
     grid_options:
       columns: 12
       rows: 4
+```
 
 ## Requisiti
 
