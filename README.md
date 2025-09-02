@@ -396,6 +396,131 @@ grid_options:
   rows: 2                          # Meno righe
 ```
 
+## Card Popup 
+# Pop-up Configurazione Sveglia Evoluta
+
+Interfaccia completa per la gestione e configurazione del sistema di sveglia intelligente, organizzata in un pop-up multi-tab con accesso tramite hash URL `#configsveglia`.
+
+## Struttura Generale
+
+La scheda utilizza un **vertical-stack** che combina:
+- **Bubble Card Pop-up**: Container principale con routing via hash
+- **Tabbed Card**: Interfaccia a schede per organizzare le funzionalità
+
+## Schede Disponibili
+
+### 1. Stato (mdi:list-status)
+
+**Monitoraggio in tempo reale** dello stato operativo della sveglia:
+
+- **Timer attivi**: Visualizzazione diretta dei timer principale e snooze
+- **Status dettagliato**: Template row personalizzata con:
+  - Stati: Attiva, Snooze, Preparata, Inattiva
+  - Tempo rimanente per stati attivi
+  - Informazioni contestuali (tipo sveglia, progresso, configurazione)
+- **Metriche operative**:
+  - Progresso sveglia con contatori e percentuale
+  - Volume e luminosità correnti durante l'esecuzione
+  - Snooze rimanenti disponibili
+  - Valori pre-sveglia memorizzati
+
+### 2. Generale (mdi:cog)
+
+**Configurazione base** del comportamento della sveglia:
+
+- **Tipo sveglia**: Selezione tra Solo Luce, Solo Musica, Luce e Musica
+- **Durata**: Configurazione minuti e secondi separati
+- **Aggiornamenti**: Numero di step per fade-in progressivo
+
+### 3. Dispositivi (mdi:devices)
+
+**Mappatura delle entità** Home Assistant utilizzate:
+
+- **Controlli fisici**: Switch interruttore e lampadina smart
+- **Media**: Entity media player e device Spotify target
+- **Contenuti**: URI playlist/brano Spotify
+
+### 4. Snooze (mdi:alarm-snooze)
+
+**Configurazione comportamento snooze**:
+
+- **Durata e limiti**: Secondi per snooze e numero massimo
+- **Moltiplicatore progressivo**: Fattore di aumento durata ad ogni snooze
+- **Comportamenti**: Mantenimento luci/musica durante pausa
+
+### 5. Audio (mdi:music)
+
+**Gestione parametri sonori**:
+
+- **Range volume**: Valori iniziale e massimo per fade-in
+- **Memorizzazione**: Volume pre-sveglia salvato automaticamente
+- **Fine sveglia**: Opzione mantenimento musica dopo completamento
+
+### 6. Luci (mdi:lightbulb)
+
+**Controllo illuminazione**:
+
+- **Range luminosità**: Valori iniziale e massimo (0.01-1.0)
+- **Memorizzazione**: Luminosità pre-sveglia salvata
+- **Fine sveglia**: Opzione mantenimento luci dopo completamento
+
+### 7. Scripts (mdi:script)
+
+**Automazioni personalizzate**:
+
+- **Script inizio**: Eseguito all'avvio sveglia
+- **Script fine naturale**: Eseguito al completamento normale
+- **Script fine interrotta**: Eseguito per interruzione manuale
+- **Abilitazione**: Toggle individuali per ogni script
+
+### 8. Utilities (mdi:wrench)
+
+**Strumenti di manutenzione**:
+
+- **Reset completo**: Ferma tutto e resetta stati (con conferma hold)
+- **Pulizia soft**: Reset parziale mantenendo configurazione
+- **Validazione**: Controllo configurazione con dettagli errori
+- **Diagnostica**: Visualizzazione errori di configurazione
+
+## Caratteristiche Tecniche
+
+### Template Entity Rows Personalizzate
+
+Utilizzate per visualizzazioni dinamiche con:
+- **Stato condizionale**: Logic template per stati diversi
+- **Icone dinamiche**: Cambiano in base al contesto
+- **Informazioni secondarie**: Dettagli aggiuntivi contestuali
+- **Colorazione**: State color attivato per stati operativi
+
+### Validazione Integrata
+
+- **Controllo real-time**: Binary sensor per validazione configurazione
+- **Feedback errori**: Attributo con lista errori specifici
+- **Prevenzione problemi**: Blocco avvio con configurazione non valida
+
+### Interfaccia Responsive
+
+- **Grid layout**: 12 colonne x 4 righe per organizzazione ottimale
+- **Divider styling**: Separatori parziali per raggruppamento logico
+- **Icon consistency**: Set di icone coerente per categorie
+
+## Flusso di Utilizzo
+
+1. **Configurazione**: Imposta parametri nelle varie schede
+2. **Validazione**: Verifica stato "Configurazione Valida"
+3. **Test**: Usa "Preparazione" per testare dispositivi
+4. **Monitoraggio**: Segui progresso nella scheda "Stato"
+5. **Manutenzione**: Usa "Utilities" per reset o pulizia
+
+## Integrazione Sistema
+
+Il pop-up si integra perfettamente con:
+- **Bubble card controllo**: Accesso via sub-button configurazione
+- **Automazioni sistema**: Lettura real-time di tutti gli stati
+- **Package sveglia**: Utilizza tutti gli helper e sensori disponibili
+- **Hash routing**: URL diretto `#configsveglia` per accesso rapido
+
+La struttura modulare permette configurazione completa mantenendo semplicità d'uso attraverso l'organizzazione logica in schede tematiche.
 Questa configurazione crea un'interfaccia touch moderna e intuitiva per il controllo completo del sistema sveglia evoluta.
 ## Automazioni Ausiliarie Incluse
 
