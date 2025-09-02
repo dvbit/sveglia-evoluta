@@ -182,6 +182,9 @@ Il sistema include validazione automatica:
 
 Configurazione per una bubble card avanzata che controlla il sistema di sveglia intelligente con interfaccia grafica dinamica e feedback visivo.
 
+In realtà la card serve solo per testing e monitoraggio.
+La sveglia sarà attivata messa in pausa e feramta da eventi esterni.
+
 <img width="192" height="207" alt="image" src="https://github.com/user-attachments/assets/efd59d27-8d40-4b11-a0f0-7a159c3ca18e" />
 
 
