@@ -1,128 +1,211 @@
-# sveglia-evoluta
-Sistema completo di sveglia intelligente che combina controllo progressivo di luci e musica Spotify con funzionalità avanzate di snooze, memorizzazione stati e ripristino automatico.
+# Sveglia Evoluta for Home Assistant
 
-Pacchetto Sveglia Evoluta per Home Assistant
-Descrizione
-Sistema completo di sveglia intelligente che combina controllo progressivo di luci e musica Spotify con funzionalità avanzate di snooze, memorizzazione stati e ripristino automatico.
-Prerequisiti
-Software Richiesti
+An advanced smart alarm system that combines progressive light and Spotify music control with sophisticated snooze functionality, state memorization, and automatic restoration.
 
-Home Assistant con supporto per packages
-Integrazione SpotifyPlus (non Spotify standard)
-Dispositivi compatibili: Lampadine smart controllabili e media player Spotify
+## Overview
 
-Configurazione Necessaria
-yaml# In configuration.yaml
+This package provides a complete intelligent wake-up system that gradually increases light brightness and music volume over a configurable duration. It includes advanced snooze capabilities, device state memorization, and automatic restoration of pre-alarm conditions.
+
+## Prerequisites
+
+### Required Software
+- **Home Assistant** with packages support enabled
+- **SpotifyPlus Integration** (not the standard Spotify integration)
+- **Compatible Devices**: Smart bulbs with brightness control and Spotify-compatible media players
+
+### Configuration Requirements
+Add to your `configuration.yaml`:
+```yaml
 homeassistant:
   packages: !include_dir_named packages
-Hardware Supportato
+```
 
-Switch/interruttori per controllo alimentazione luci
-Lampadine smart con controllo luminosità
-Speaker/dispositivi compatibili con Spotify Connect
+### Supported Hardware
+- Smart switches/relays for light power control
+- Dimmable smart bulbs or lights
+- Spotify Connect compatible speakers/devices
 
-Componenti del Package
-Helper (38 entità)
+## Package Components
 
-5 Input Boolean: Trigger di controllo e configurazioni comportamento
-12 Input Number: Parametri temporali, volume, luminosità e contatori
-1 Input Select: Tipo di sveglia (Solo Luce/Solo Musica/Entrambi)
-8 Input Text: Configurazione entità dispositivi e script personalizzati
-3 Timer: Gestione temporizzazioni principale, progresso e snooze
-9 Sensor/Binary Sensor: Monitoraggio stato e validazione configurazione
+### Input Helpers (38 entities)
+- **5 Input Booleans**: Control triggers and behavior configurations
+- **12 Input Numbers**: Timing parameters, volume/brightness settings, and counters
+- **1 Input Select**: Alarm type selection (Light Only/Music Only/Both)
+- **8 Input Text**: Device entity and custom script configuration
+- **3 Timers**: Main alarm, progress tracking, and snooze management
+- **9 Sensors/Binary Sensors**: Status monitoring and configuration validation
 
-Automazioni (4)
+### Automations (4)
+- **Main Alarm**: Complete alarm cycle management
+- **Preparation**: Device testing and pre-alarm state memorization
+- **Trigger Reset**: Automatic cleanup of temporary states
+- **Notifications**: Visual feedback for state changes
 
-Automazione Principale: Gestione completa ciclo sveglia
-Preparazione: Test dispositivi e memorizzazione stati pre-sveglia
-Reset Trigger: Pulizia automatica stati temporanei
-Notifiche: Feedback visivo cambiamenti stato
+### Scripts (3)
+- **Complete Reset**: Full system restoration
+- **Automatic Cleanup**: Soft maintenance on restart
+- **Customizable Scripts**: User-defined actions for each alarm phase
 
-Script (3)
+## Core Features
 
-Reset Completo: Ripristino totale sistema
-Pulizia Automatica: Manutenzione soft al restart
-Script Personalizzabili: Azioni custom per ogni fase sveglia
+### Smart Preparation
+- Automatic device testing (5-second duration)
+- Memorization of original volume and brightness levels
+- Configuration validation before use
+- Device readiness verification
 
-Funzionalità Principali
-Preparazione Smart
+### Progressive Control
+- Gradual volume increase (configurable 1%-100%)
+- Progressive brightness enhancement (configurable 1%-100%)
+- Customizable number of updates and intervals
+- Smooth transitions to prevent jarring wake-ups
 
-Test automatico dispositivi (5 secondi)
-Memorizzazione volume e luminosità originali
-Validazione configurazione prima dell'uso
+### Advanced Snooze System
+- Configurable maximum snooze count (1-100)
+- Fixed or multiplicative progressive duration
+- Selective light/music control during snooze periods
+- Intelligent snooze availability tracking
 
-Controllo Progressivo
+### Intelligent Restoration
+- Automatic restoration of pre-alarm values at cycle end
+- Separate device control (maintain on/turn off)
+- Smooth transitions to avoid sensory shock
+- Configurable end-of-alarm behavior
 
-Aumento graduale volume (1%-100%)
-Incremento progressivo luminosità (1%-100%)
-Configurabile numero aggiornamenti e intervalli
+### Real-time Monitoring
+- Live alarm progress percentage
+- Visual countdown timers
+- Real-time device status
+- Continuous configuration validation
 
-Sistema Snooze Avanzato
+## Operating Modes
 
-Numero massimo configurabile (1-100)
-Durata fissa o moltiplicativa progressiva
-Controllo selettivo luci/musica durante snooze
+### Light Only Mode
+Exclusive lighting control with progressive brightness increase from initial to maximum configured levels.
 
-Ripristino Intelligente
+### Music Only Mode
+Spotify volume management with automatic device selection and progressive volume ramping.
 
-Ripristino automatico valori pre-sveglia a fine ciclo
-Controllo separato dispositivi (mantieni acceso/spegni)
-Transizioni fluide per evitare shock sensoriali
+### Light and Music Mode
+Synchronized coordination of both lighting and audio systems with parallel progression curves.
 
-Monitoraggio Real-time
+## Device Configuration
 
-Progresso percentuale sveglia
-Countdown timer visibili
-Stati dispositivi in tempo reale
-Validazione configurazione continua
+### Required Entity Inputs
+- `input_text.sveglia_entita_switch`: Power switch/relay entity
+- `input_text.sveglia_entita_luce`: Smart bulb/light entity
+- `input_text.sveglia_entita_media_player`: SpotifyPlus entity
+- `input_text.sveglia_spotify_device_name`: Spotify Connect device name
 
-Modalità Operative
-Solo Luce
-Controllo esclusivo illuminazione con progressione luminosità
-Solo Musica
-Gestione volume Spotify con selezione automatica device
-Luce e Musica
-Coordinamento sincronizzato entrambi i sistemi
-Configurazione Dispositivi
-Entità Richieste
+### Critical Parameters
+- **Spotify URI**: Format `spotify:track:ID` or `spotify:playlist:ID`
+- **Total Duration**: Minutes + seconds configuration
+- **Volume Range**: Initial (1-50%) to maximum (50-100%)
+- **Brightness Range**: Initial (1-30%) to maximum (50-100%)
 
-input_text.sveglia_entita_switch: Interruttore alimentazione
-input_text.sveglia_entita_luce: Lampadina smart
-input_text.sveglia_entita_media_player: Entity SpotifyPlus
-input_text.sveglia_spotify_device_name: Nome device Spotify Connect
+## Installation
 
-Parametri Critici
+1. Save the package file as `packages/sveglia_evoluta.yaml`
+2. Ensure packages are enabled in `configuration.yaml`
+3. Restart Home Assistant
+4. Configure device entities in the Lovelace card
+5. Set desired alarm parameters
+6. Test with the preparation function
 
-URI Spotify (formato: spotify:track:ID o spotify:playlist:ID)
-Durata totale (minuti + secondi)
-Range volume (iniziale 1-50%, massimo 50-100%)
-Range luminosità (iniziale 1-30%, massima 50-100%)
+## Usage Workflow
 
-Sicurezza e Affidabilità
-Gestione Errori
+### Initial Setup
+1. Configure device entities in the control card
+2. Set timing, volume, and brightness parameters
+3. Choose alarm type (Light/Music/Both)
+4. Configure snooze preferences
 
-continue_on_error: true per azioni critiche
-Timeout configurabili per operazioni di rete
-Validazione parametri prima dell'esecuzione
+### Operation Cycle
+1. **Preparation**: Activate `input_boolean.sveglia_attivazione`
+   - Tests devices for 5 seconds
+   - Memorizes current volume/brightness levels
+   - Validates configuration
 
-Persistenza Dati
+2. **Activation**: Trigger `input_boolean.sveglia_trigger_inizio`
+   - Only available after successful preparation
+   - Starts progressive alarm cycle
 
-Timer sopravvivono ai restart di Home Assistant
-Configurazioni mantengono stati tra sessioni
-Auto-pulizia stati temporanei al riavvio
+3. **Management**: Use snooze or stop as needed
+   - Snooze maintains or pauses devices based on configuration
+   - Stop immediately ends alarm cycle
 
-Controlli di Sicurezza
+4. **Restoration**: Automatic at cycle completion
+   - Returns devices to pre-alarm states if configured for shutdown
+   - Smooth transitions prevent abrupt changes
 
-Validazione range parametri
-Verifiche disponibilità dispositivi
-Fallback su valori predefiniti
+## Safety and Reliability Features
 
-Utilizzo Tipo
+### Error Handling
+- `continue_on_error: true` for critical actions
+- Configurable timeouts for network operations
+- Parameter validation before execution
+- Graceful fallback on device unavailability
 
-Configurazione iniziale: Impostare entità dispositivi e parametri
-Preparazione: Attivare input_boolean.sveglia_attivazione
-Avvio: Trigger input_boolean.sveglia_trigger_inizio
-Gestione: Usare snooze o stop secondo necessità
-Ripristino: Automatico a fine ciclo o manuale tramite script
+### Data Persistence
+- Timers survive Home Assistant restarts
+- Configuration states maintained between sessions
+- Automatic cleanup of temporary states on reboot
+- Restore functionality for interrupted cycles
 
-Il sistema garantisce un risveglio graduale e personalizzabile con ripristino completo delle condizioni originali dell'ambiente.
+### Security Controls
+- Parameter range validation
+- Device availability verification
+- Fallback to safe default values
+- Protection against infinite loops
+
+## Customization Options
+
+### Custom Scripts
+- Begin alarm script execution
+- Natural end script execution
+- Manual interruption script execution
+- User-defined notification systems
+
+### Behavior Configuration
+- Maintain lights/music during snooze
+- Keep devices on at manual alarm end
+- Multiplicative snooze duration increase
+- Custom progression curves
+
+### Monitoring and Logging
+- Real-time status sensors
+- Progress tracking
+- Error state reporting
+- Historical cycle data
+
+## Troubleshooting
+
+### Common Issues
+- **SpotifyPlus not working**: Verify integration installation and device name accuracy
+- **Lights not responding**: Check entity configuration and device availability
+- **Configuration invalid**: Review parameter ranges and required fields
+- **Timer not starting**: Ensure preparation step completed successfully
+
+### Validation Checks
+The system includes comprehensive validation that checks:
+- Duration parameters > 0
+- Volume ranges within acceptable limits
+- Brightness values in valid ranges
+- Required entities are configured
+- Alarm activation completed before start
+
+## Technical Notes
+
+### Performance Considerations
+- Update intervals calculated based on total duration and number of updates
+- Minimal resource usage during idle periods
+- Efficient state management for large snooze counts
+- Optimized Spotify API calls
+
+### Integration Dependencies
+- Requires SpotifyPlus (not standard Spotify integration)
+- Compatible with most smart light platforms
+- Timer functionality independent of external services
+- Persistent storage for critical state data
+
+This package provides a sophisticated yet reliable wake-up experience with extensive customization options and robust error handling.
