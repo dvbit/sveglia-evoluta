@@ -519,7 +519,7 @@ script:
     sequence:
       - action: persistent_notification.create
         data:
-          title: "🌅 Buongiorno!"
+          title: "Buongiorno!"
           message: "La sveglia è iniziata - Buona giornata!"
           notification_id: "sveglia_buongiorno"
 
@@ -545,7 +545,7 @@ script:
       
       - action: persistent_notification.create
         data:
-          title: "⏹️ Sveglia Interrotta"
+          title: "Sveglia Interrotta"
           message: "La sveglia è stata fermata manualmente"
           notification_id: "sveglia_interrotta"
       
@@ -578,6 +578,7 @@ script:
             - input_boolean.sveglia_trigger_inizio
             - input_boolean.sveglia_trigger_fine
             - input_boolean.sveglia_trigger_snooze
+            - input.boolean.sveglia_attivazione
       
       # Reset tutti i contatori
       - action: input_number.set_value
@@ -628,7 +629,7 @@ script:
       # Notifica reset completato
       - action: persistent_notification.create
         data:
-          title: "🔄 Reset Sveglia Completato"
+          title: "Reset Sveglia Completato"
           message: "Tutti gli helper e dispositivi sono stati resettati. La sveglia è pronta per un nuovo ciclo."
           notification_id: "sveglia_reset"
       
@@ -668,6 +669,55 @@ script:
                 - input_number.sveglia_aggiornamenti_contatore
             data:
               value: 0
+
+  # Script per controllo intelligente sveglia/snooze
+  sveglia_controllo_intelligente:
+    alias: "Sveglia - Controllo Intelligente"
+    description: "Prepara se non preparato, avvia se preparato, snooze se avviato"
+    mode: single
+    sequence:
+      # Invia evento per attivare l'automazione di controllo intelligente
+      - event: sveglia_controllo_intelligente
+        event_data:
+          trigger: manuale
+        
+  # Script helper per il controllo intelligente
+  sveglia_controllo_intelligente_helper:
+    alias: "Sveglia - Controllo Intelligente Helper"
+    description: "Helper script per controllo intelligente"
+    mode: single
+    variables:
+      sveglia_in_corso: "{{ is_state('timer.sveglia_principale', 'active') }}"
+      snooze_in_corso: "{{ is_state('timer.sveglia_snooze', 'active') }}"
+      sveglia_preparata: "{{ is_state('input_boolean.sveglia_attivazione', 'on') }}"
+    sequence:
+      - choose:
+          # Se la sveglia è attiva o in snooze, attiva snooze
+          - conditions:
+              - condition: template
+                value_template: "{{ sveglia_in_corso or snooze_in_corso }}"
+            sequence:
+              - action: input_boolean.turn_on
+                target:
+                  entity_id: input_boolean.sveglia_trigger_snooze
+          
+          # Se la sveglia non è attiva ma è preparata, avvia sveglia
+          - conditions:
+              - condition: template
+                value_template: "{{ not sveglia_in_corso and not snooze_in_corso and sveglia_preparata }}"
+            sequence:
+              - action: input_boolean.turn_on
+                target:
+                  entity_id: input_boolean.sveglia_trigger_inizio
+          
+          # Se la sveglia non è preparata, prepara automaticamente
+          - conditions:
+              - condition: template
+                value_template: "{{ not sveglia_in_corso and not snooze_in_corso and not sveglia_preparata }}"
+            sequence:
+              - action: input_boolean.turn_on
+                target:
+                  entity_id: input_boolean.sveglia_attivazione
 
 # ========================================
 # AUTOMAZIONE PRINCIPALE SVEGLIA EVOLUTA
@@ -1152,6 +1202,7 @@ automation:
                     - input_boolean.sveglia_trigger_inizio
                     - input_boolean.sveglia_trigger_fine
                     - input_boolean.sveglia_trigger_snooze
+                    - input.boolean.sveglia_attivazione
               
               # Reset contatori
               - action: input_number.set_value
@@ -1272,6 +1323,7 @@ automation:
                     - input_boolean.sveglia_trigger_inizio
                     - input_boolean.sveglia_trigger_fine
                     - input_boolean.sveglia_trigger_snooze
+                    - input.boolean.sveglia_attivazione
               
               # Reset contatori
               - action: input_number.set_value
@@ -1340,7 +1392,9 @@ automation:
             sequence:
               - action: input_boolean.turn_off
                 target:
-                  entity_id: input_boolean.sveglia_trigger_fine
+                  entity_id: 
+                    - input_boolean.sveglia_trigger_fine
+                    - input_boolean.sveglia_trigger_inizio
   
   # Automazione per notifica stato sveglia
   - id: sveglia_notifiche
@@ -1370,7 +1424,7 @@ automation:
             sequence:
               - action: persistent_notification.create
                 data:
-                  title: "🔔 Sveglia Avviata"
+                  title: "Sveglia Avviata"
                   message: >
                     Tipo: {{ states('input_select.sveglia_tipo') }}
                     Durata: {{ state_attr('sensor.sveglia_durata_totale', 'durata_formattata') }}
@@ -1388,7 +1442,7 @@ automation:
               
               - action: persistent_notification.create
                 data:
-                  title: "⏰ Sveglia Terminata"
+                  title: "Sveglia Terminata"
                   message: "La sveglia è stata completata o interrotta"
                   notification_id: "sveglia_end"
               
@@ -1405,7 +1459,7 @@ automation:
             sequence:
               - action: persistent_notification.create
                 data:
-                  title: "😴 Snooze Attivato"
+                  title: "Snooze Attivato"
                   message: >
                     Durata: {{ state_attr('sensor.sveglia_snooze_prossima_durata', 'durata_formattata') }}
                     Rimanenti: {{ state_attr('binary_sensor.snooze_disponibile', 'snooze_rimanenti') }}
@@ -1430,6 +1484,90 @@ automation:
         data:
           message: "Sveglia Evoluta: Pulizia automatica completata al restart"
           level: info
+
+  # Automazione controllo intelligente sveglia/snooze (MODIFICATA)
+  - id: sveglia_controllo_intelligente
+    alias: "Sveglia - Controllo Intelligente Start/Snooze"
+    description: "Prepara se non preparato, avvia se preparato, snooze se avviato"
+    mode: single
+    variables:
+      sveglia_in_corso: "{{ is_state('timer.sveglia_principale', 'active') }}"
+      snooze_in_corso: "{{ is_state('timer.sveglia_snooze', 'active') }}"
+      sveglia_preparata: "{{ is_state('input_boolean.sveglia_attivazione', 'on') }}"
+    
+    triggers:
+      # Trigger manuale - può essere chiamata da servizi esterni, pulsanti fisici, etc.
+      - trigger: event
+        event_type: sveglia_controllo_intelligente
+        id: "chiamata_manuale"
+    
+    actions:
+      - choose:
+          # Se la sveglia è attiva o in snooze, attiva snooze
+          - conditions:
+              - condition: template
+                value_template: "{{ sveglia_in_corso or snooze_in_corso }}"
+            sequence:
+              - action: input_boolean.turn_on
+                target:
+                  entity_id: input_boolean.sveglia_trigger_snooze
+              
+              - action: persistent_notification.create
+                data:
+                  title: "Snooze Attivato"
+                  message: "Sveglia in corso rilevata - Snooze attivato automaticamente"
+                  notification_id: "sveglia_controllo_intelligente"
+              
+              - delay:
+                  seconds: 3
+              
+              - action: persistent_notification.dismiss
+                data:
+                  notification_id: "sveglia_controllo_intelligente"
+          
+          # Se la sveglia non è attiva ma è preparata, avvia sveglia
+          - conditions:
+              - condition: template
+                value_template: "{{ not sveglia_in_corso and not snooze_in_corso and sveglia_preparata }}"
+            sequence:
+              - action: input_boolean.turn_on
+                target:
+                  entity_id: input_boolean.sveglia_trigger_inizio
+              
+              - action: persistent_notification.create
+                data:
+                  title: "Sveglia Avviata"
+                  message: "Sveglia non attiva - Avvio automatico eseguito"
+                  notification_id: "sveglia_controllo_intelligente"
+              
+              - delay:
+                  seconds: 3
+              
+              - action: persistent_notification.dismiss
+                data:
+                  notification_id: "sveglia_controllo_intelligente"
+          
+          # Se la sveglia non è preparata, prepara automaticamente
+          - conditions:
+              - condition: template
+                value_template: "{{ not sveglia_in_corso and not snooze_in_corso and not sveglia_preparata }}"
+            sequence:
+              - action: input_boolean.turn_on
+                target:
+                  entity_id: input_boolean.sveglia_attivazione
+              
+              - action: persistent_notification.create
+                data:
+                  title: "Preparazione Sveglia"
+                  message: "Sveglia non preparata - Preparazione automatica in corso"
+                  notification_id: "sveglia_controllo_intelligente"
+              
+              - delay:
+                  seconds: 3
+              
+              - action: persistent_notification.dismiss
+                data:
+                  notification_id: "sveglia_controllo_intelligente"
 
   # Automazione di preparazione sveglia
   - id: sveglia_preparazione
@@ -1541,7 +1679,7 @@ automation:
       # Notifica di preparazione completata
       - action: persistent_notification.create
         data:
-          title: "✅ Sveglia Preparata"
+          title: "Sveglia Preparata"
           message: >
             La sveglia è stata preparata e testata:
             - Tipo: {{ tipo_sveglia }}
