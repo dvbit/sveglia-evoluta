@@ -756,6 +756,9 @@ La scheda utilizza un **vertical-stack** che combina:
 
 ### 1. Stato (mdi:list-status)
 
+<img width="530" height="503" alt="image" src="https://github.com/user-attachments/assets/d5805fdb-df15-4f35-8e56-ba65c597101e" />
+
+
 **Monitoraggio in tempo reale** dello stato operativo della sveglia:
 
 - **Timer attivi**: Visualizzazione diretta dei timer principale e snooze
@@ -771,6 +774,9 @@ La scheda utilizza un **vertical-stack** che combina:
 
 ### 2. Generale (mdi:cog)
 
+<img width="525" height="341" alt="image" src="https://github.com/user-attachments/assets/1385840a-c34c-45d1-905f-b53d311f3fdb" />
+
+
 **Configurazione base** del comportamento della sveglia:
 
 - **Tipo sveglia**: Selezione tra Solo Luce, Solo Musica, Luce e Musica
@@ -778,6 +784,9 @@ La scheda utilizza un **vertical-stack** che combina:
 - **Aggiornamenti**: Numero di step per fade-in progressivo
 
 ### 3. Dispositivi (mdi:devices)
+
+<img width="531" height="441" alt="image" src="https://github.com/user-attachments/assets/8907dfa9-af86-4917-b9d1-f1c37702d614" />
+
 
 **Mappatura delle entità** Home Assistant utilizzate:
 
@@ -787,6 +796,9 @@ La scheda utilizza un **vertical-stack** che combina:
 
 ### 4. Snooze (mdi:alarm-snooze)
 
+<img width="534" height="401" alt="image" src="https://github.com/user-attachments/assets/1823a69f-b5ae-46f7-b3d1-f1b9069ed59a" />
+
+
 **Configurazione comportamento snooze**:
 
 - **Durata e limiti**: Secondi per snooze e numero massimo
@@ -794,6 +806,9 @@ La scheda utilizza un **vertical-stack** che combina:
 - **Comportamenti**: Mantenimento luci/musica durante pausa
 
 ### 5. Audio (mdi:music)
+
+<img width="533" height="314" alt="image" src="https://github.com/user-attachments/assets/b179f0a4-2134-41b0-9532-1f9c6fd0a742" />
+
 
 **Gestione parametri sonori**:
 
@@ -803,13 +818,20 @@ La scheda utilizza un **vertical-stack** che combina:
 
 ### 6. Luci (mdi:lightbulb)
 
+<img width="527" height="311" alt="image" src="https://github.com/user-attachments/assets/f05a9bd4-5924-4912-a528-3b573a2b8507" />
+
+
 **Controllo illuminazione**:
 
 - **Range luminosità**: Valori iniziale e massimo (0.01-1.0)
 - **Memorizzazione**: Luminosità pre-sveglia salvata
 - **Fine sveglia**: Opzione mantenimento luci dopo completamento
 
+
+
 ### 7. Scripts (mdi:script)
+
+<img width="1062" height="918" alt="image" src="https://github.com/user-attachments/assets/b2a07c6a-f26b-4066-b52c-16e4dda642e5" />
 
 **Automazioni personalizzate**:
 
@@ -819,6 +841,9 @@ La scheda utilizza un **vertical-stack** che combina:
 - **Abilitazione**: Toggle individuali per ogni script
 
 ### 8. Utilities (mdi:wrench)
+
+<img width="1036" height="606" alt="image" src="https://github.com/user-attachments/assets/1e2bfae4-7905-481d-9c09-cfb98b1ee5a6" />
+
 
 **Strumenti di manutenzione**:
 
