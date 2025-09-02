@@ -366,7 +366,7 @@ La card rileva automaticamente e reagisce a questi stati:
 3. **Attiva**: Icona accesa, border progress circolare, possibili animazioni
 4. **Snooze**: Icona pulsante, border progress rettangolare, timer dedicato
 
-## Codice card
+## Codice card Popup Monitoraggio e Configurazione
 ```yaml
 
 # Pop-up Configurazione Sveglia Evoluta
