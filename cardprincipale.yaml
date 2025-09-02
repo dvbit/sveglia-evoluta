@@ -1,0 +1,111 @@
+type: custom:bubble-card
+card_type: button
+button_type: switch
+modules:
+  - visual_styling_center
+  - conditional_icon
+  - icon_border_progress
+  - icon_animations
+  - subbutton_colors
+  - timer_progress
+  - subbutton_below
+conditional_icon:
+  advanced_settings:
+    color_true: dark-grey
+    color_false: green
+  conditions:
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_boolean.sveglia_attivazione
+          state: "on"
+        - condition: state
+          entity_id: input_boolean.sveglia_trigger_inizio
+          state: "on"
+        - condition: state
+          entity_id: input_boolean.sveglia_trigger_snooze
+          state: "on"
+  icon_true: mdi:alarm
+  icon_false: mdi:alarm-off
+tap_action:
+  action: call-service
+  perform_action: script.sveglia_controllo_intelligente
+  target: {}
+sub_button:
+  - icon: mdi:cog
+    tap_action:
+      action: navigate
+      url_path: "#configsveglia"
+      navigation_path: "#configsveglia"
+grid_options:
+  columns: 5
+  rows: 3
+force_icon: false
+show_state: false
+show_name: false
+scrolling_effect: false
+icon_border_progress:
+  - source: timer.sveglia_principale
+    button: main
+    invert: false
+    condition:
+      - condition: state
+        entity_id: input_boolean.sveglia_trigger_snooze
+        state: "off"
+    border_radius: 50%
+    remaining_color: accent
+    background_color: primary
+  - button: main
+    source: timer.sveglia_snooze
+    invert: true
+    remaining_color: accent
+    border_radius: 20px
+    condition:
+      - condition: state
+        entity_id: input_boolean.sveglia_trigger_snooze
+        state: "on"
+    interpolate_colors: false
+card_layout: large
+visual_styling_center:
+  icon_size_multiplier: 1.5
+  subicon_size_multiplier: 1.2
+  subbutton_background_ratio: 1.5
+  height_multiplier: 1
+  icon_background_ratio: 1.5
+  subbutton_row_spacing: 13
+  subbutton_column_spacing: -4
+  icon_vertical_margin: -10
+  inner_padding: 20
+  subbutton_horizontal_margin: -10
+double_tap_action:
+  action: perform-action
+  perform_action: input_boolean.turn_on
+  target:
+    entity_id: input_boolean.sveglia_trigger_snooze
+button_action:
+  tap_action:
+    action: none
+entity: media_player.lg_webos_tv_oled65b9sla_5
+timer_progress:
+  timer_entity: timer.sveglia_snooze
+  startColor: red
+  endColor: green
+  inverted: true
+icon_animations:
+  animation_type: pulse
+  animate_when:
+    - condition: state
+      entity_id: timer.sveglia_snooze
+      state: active
+hold_action:
+  action: perform-action
+  perform_action: input_boolean.turn_on
+  target:
+    entity_id: input_boolean.sveglia_trigger_fine
+subbutton_colors:
+  subbutton1:
+    color: green
+    condition:
+      - condition: state
+        entity_id: input_boolean.sveglia_script_inizio_attivo
+        state: "on"
